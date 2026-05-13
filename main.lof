@@ -8,5 +8,8 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {6.1}{\ignorespaces Terminal Output of Threshold Optimization}}{43}{figure.caption.21}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces ROC Curve Comparison of Baseline Models}}{45}{figure.caption.24}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Precision--Recall Curve Comparison}}{46}{figure.caption.25}%
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Model Performance Comparison Heatmap}}{47}{figure.caption.26}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }

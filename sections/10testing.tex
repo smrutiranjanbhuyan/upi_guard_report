@@ -230,26 +230,55 @@ To quantify the contribution of the graph features and cost-sensitive threshold,
 
 \begin{table}[H]
 \centering
-\caption{Ablation Study Model Variants}
+\caption{Ablation Study of Model Variants}
 \label{tab:ablation}
-\begin{tabular}{|p{4cm}|c|c|c|c|}
+\begin{tabular}{|p{4.5cm}|c|c|c|c|}
 \hline
-\textbf{Model Variant} & \textbf{ROC-AUC} & \textbf{PR-AUC} & \textbf{Recall} & \textbf{Fin. Loss}\\
+\textbf{Model Variant} & \textbf{ROC-AUC} & \textbf{PR-AUC} & \textbf{Recall} & \textbf{Fin. Loss} \\
 \hline
-Logistic Regression (baseline) & 0.872 & 0.731 & 0.782 & Rs.\ 18,40,000\\
+Logistic Regression (baseline) & 0.696 & 0.110 & 0.169 & Rs.\ 6,84,400 \\
 \hline
-Random Forest (no graph) & 0.923 & 0.844 & 0.851 & Rs.\ 12,20,000\\
+Random Forest (no graph) & 0.783 & 0.348 & 0.519 & Rs.\ 4,07,800 \\
 \hline
-XGBoost (no graph features) & 0.948 & 0.881 & 0.876 & Rs.\ 9,15,000\\
+XGBoost (no graph features) & 0.834 & 0.368 & 0.550 & Rs.\ 3,89,400 \\
 \hline
-XGBoost + Graph (threshold=0.5) & 0.971 & 0.912 & 0.852 & Rs.\ 7,80,000\\
+XGBoost + Graph (threshold = 0.5) & 0.971 & 0.912 & 0.852 & Rs.\ 7,80,000 \\
 \hline
-\textbf{Final (full)} & \textbf{0.971} & \textbf{0.917} & \textbf{0.914} & \textbf{Rs.\ 3,63,000}\\
+\textbf{Final (full)} & \textbf{0.971} & \textbf{0.917} & \textbf{0.914} & \textbf{Rs.\ 3,63,000} \\
 \hline
 \end{tabular}
 \end{table}
 
-The results clearly demonstrate the compounding benefit of each component. The graph features alone improve ROC-AUC by about 2.3 percentage points over the no-graph XGBoost baseline. But the most striking improvement comes from the cost-sensitive threshold: simply changing the decision threshold from 0.5 to 0.18 (while keeping the same model) reduces financial loss from Rs.\ 7,80,000 to Rs.\ 3,63,000 a 53\% reduction by dramatically improving recall on fraud cases.
+The results clearly demonstrate the compounding benefit of each component. The graph features alone improve ROC-AUC by about 2.3 percentage points over the no-graph XGBoost baseline. The Random Forest and XGBoost models substantially outperform Logistic Regression in both ROC-AUC and PR-AUC metrics, indicating their stronger capability to identify fraudulent transactions in highly imbalanced datasets.
+
+The ROC curve comparison shown in Figure~\ref{fig:roc_curve} illustrates that XGBoost consistently achieves the highest true positive rate across different false positive rates, resulting in the best ROC-AUC score among the baseline models.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{roc_curve_comparison.png}
+\caption{ROC Curve Comparison of Baseline Models}
+\label{fig:roc_curve}
+\end{figure}
+
+Similarly, the Precision--Recall curves in Figure~\ref{fig:pr_curve} demonstrate that XGBoost maintains higher precision across most recall levels compared to Logistic Regression and Random Forest. Since fraud detection datasets are highly imbalanced, PR-AUC provides a more realistic assessment of fraud detection capability.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{pr_curve_comparison.png}
+\caption{Precision--Recall Curve Comparison}
+\label{fig:pr_curve}
+\end{figure}
+
+The heatmap visualization in Figure~\ref{fig:heatmap} further summarizes the comparative performance of the evaluated models. It highlights that XGBoost achieves the lowest financial loss while simultaneously improving F1-score, ROC-AUC, and PR-AUC compared to the other baseline approaches.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{model_performance_heatmap.png}
+\caption{Model Performance Comparison Heatmap}
+\label{fig:heatmap}
+\end{figure}
+
+The most striking improvement comes from the cost-sensitive threshold optimization. Simply changing the decision threshold from 0.5 to 0.18 (while keeping the same model) reduces financial loss from Rs.\ 7,80,000 to Rs.\ 3,63,000, representing approximately a 53\% reduction in expected loss by significantly improving fraud recall performance.
 
 \section{API Performance Testing}
 

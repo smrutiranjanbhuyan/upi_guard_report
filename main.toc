@@ -91,34 +91,34 @@
 \contentsline {subsection}{\numberline {6.2.4}Cost-Sensitive Threshold Analysis}{43}{subsection.6.2.4}%
 \contentsline {section}{\numberline {6.3}Feature Importance Analysis}{43}{section.6.3}%
 \contentsline {section}{\numberline {6.4}Comparison with Baseline Models}{44}{section.6.4}%
-\contentsline {section}{\numberline {6.5}API Performance Testing}{45}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Dashboard Testing}{45}{section.6.6}%
-\contentsline {chapter}{\numberline {7}Technologies and Tools Used}{47}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Programming Language: Python}{47}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Core Machine Learning Libraries}{47}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}XGBoost}{47}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}scikit-learn}{48}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}pandas and NumPy}{48}{subsection.7.2.3}%
-\contentsline {section}{\numberline {7.3}Graph Analysis: NetworkX}{48}{section.7.3}%
-\contentsline {section}{\numberline {7.4}API Framework: FastAPI}{49}{section.7.4}%
-\contentsline {subsection}{\numberline {7.4.1}Uvicorn}{49}{subsection.7.4.1}%
-\contentsline {section}{\numberline {7.5}Dashboard: Streamlit}{49}{section.7.5}%
-\contentsline {section}{\numberline {7.6}Data Visualization: Plotly}{50}{section.7.6}%
-\contentsline {section}{\numberline {7.7}Version Control: Git and GitHub}{50}{section.7.7}%
-\contentsline {section}{\numberline {7.8}Development Tools}{50}{section.7.8}%
-\contentsline {chapter}{\numberline {8}Conclusion and Future Work}{51}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Conclusion}{51}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Limitations}{52}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Future Work}{52}{section.8.3}%
-\contentsline {subsection}{\numberline {8.3.1}Graph Neural Networks (GNN)}{53}{subsection.8.3.1}%
-\contentsline {subsection}{\numberline {8.3.2}Real-Time Streaming Detection}{53}{subsection.8.3.2}%
-\contentsline {subsection}{\numberline {8.3.3}SHAP Explainability}{53}{subsection.8.3.3}%
-\contentsline {subsection}{\numberline {8.3.4}Multi-Algorithm Ensemble}{53}{subsection.8.3.4}%
-\contentsline {subsection}{\numberline {8.3.5}Concept Drift Detection and Adaptive Retraining}{53}{subsection.8.3.5}%
-\contentsline {subsection}{\numberline {8.3.6}Docker Deployment}{54}{subsection.8.3.6}%
-\contentsline {subsection}{\numberline {8.3.7}Feedback Loop Integration}{54}{subsection.8.3.7}%
-\contentsline {section}{\numberline {8.4}Summary}{54}{section.8.4}%
-\contentsline {chapter}{References}{55}{Item.38}%
-\contentsline {chapter}{Appendix A: Complete requirements.txt}{57}{appendix*.28}%
-\contentsline {chapter}{Appendix B: Sample API Request and Response}{58}{appendix*.29}%
-\contentsline {chapter}{Appendix C: Project Repository Structure}{60}{appendix*.30}%
+\contentsline {section}{\numberline {6.5}API Performance Testing}{47}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Dashboard Testing}{48}{section.6.6}%
+\contentsline {chapter}{\numberline {7}Technologies and Tools Used}{49}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Programming Language: Python}{49}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Core Machine Learning Libraries}{49}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}XGBoost}{49}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}scikit-learn}{50}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}pandas and NumPy}{50}{subsection.7.2.3}%
+\contentsline {section}{\numberline {7.3}Graph Analysis: NetworkX}{50}{section.7.3}%
+\contentsline {section}{\numberline {7.4}API Framework: FastAPI}{51}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Uvicorn}{51}{subsection.7.4.1}%
+\contentsline {section}{\numberline {7.5}Dashboard: Streamlit}{51}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Data Visualization: Plotly}{52}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Version Control: Git and GitHub}{52}{section.7.7}%
+\contentsline {section}{\numberline {7.8}Development Tools}{52}{section.7.8}%
+\contentsline {chapter}{\numberline {8}Conclusion and Future Work}{53}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Conclusion}{53}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Limitations}{54}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Future Work}{54}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Graph Neural Networks (GNN)}{55}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Real-Time Streaming Detection}{55}{subsection.8.3.2}%
+\contentsline {subsection}{\numberline {8.3.3}SHAP Explainability}{55}{subsection.8.3.3}%
+\contentsline {subsection}{\numberline {8.3.4}Multi-Algorithm Ensemble}{55}{subsection.8.3.4}%
+\contentsline {subsection}{\numberline {8.3.5}Concept Drift Detection and Adaptive Retraining}{55}{subsection.8.3.5}%
+\contentsline {subsection}{\numberline {8.3.6}Docker Deployment}{56}{subsection.8.3.6}%
+\contentsline {subsection}{\numberline {8.3.7}Feedback Loop Integration}{56}{subsection.8.3.7}%
+\contentsline {section}{\numberline {8.4}Summary}{56}{section.8.4}%
+\contentsline {chapter}{References}{57}{Item.38}%
+\contentsline {chapter}{Appendix A: Complete requirements.txt}{59}{appendix*.31}%
+\contentsline {chapter}{Appendix B: Sample API Request and Response}{60}{appendix*.32}%
+\contentsline {chapter}{Appendix C: Project Repository Structure}{62}{appendix*.33}%
