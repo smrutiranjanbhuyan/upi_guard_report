@@ -97,7 +97,7 @@ fraud\_flag & Binary & 1 = fraudulent transaction, 0 = legitimate\\
 
 \subsection{Class Distribution}
 
-The dataset exhibits significant class imbalance, which is realistic -- genuine fraud cases constitute only a small fraction of total UPI transactions. Approximately 3.2\% of records are labeled as fraudulent, resulting in roughly 3,200 fraud cases among 100,000 total transactions. This imbalance is handled during training through the \texttt{scale\_pos\_weight} mechanism described in Section~\ref{sec:imbalance}.
+The dataset exhibits significant class imbalance, which is realistic genuine fraud cases constitute only a small fraction of total UPI transactions. Approximately 3.2\% of records are labeled as fraudulent, resulting in roughly 3,200 fraud cases among 100,000 total transactions. This imbalance is handled during training through the \texttt{scale\_pos\_weight} mechanism described in Section~\ref{sec:imbalance}.
 
 \section{Feature Engineering}
 
@@ -203,7 +203,7 @@ df["sender_degree"] = df["sender_id"].map(degree)
 
 Two graph centrality metrics are computed:
 
-\paragraph{PageRank} PageRank, originally developed for ranking web pages, assigns a score to each node based on the quantity and quality of incoming edges. In a transaction graph, a node with high PageRank is one that receives transactions from many other nodes that themselves have high PageRank -- a pattern consistent with a central aggregator or money mule account. The algorithm is defined recursively as:
+\paragraph{PageRank} PageRank, originally developed for ranking web pages, assigns a score to each node based on the quantity and quality of incoming edges. In a transaction graph, a node with high PageRank is one that receives transactions from many other nodes that themselves have high PageRank a pattern consistent with a central aggregator or money mule account. The algorithm is defined recursively as:
 
 \begin{equation}
 PR(u) = \frac{1-d}{N} + d \sum_{v \in B_u} \frac{PR(v)}{L(v)}
@@ -286,13 +286,13 @@ The model is configured with the following hyperparameter values, arrived at thr
 \hline
 \texttt{gamma} & 1 & Regularization on tree growth\\
 \hline
-\texttt{subsample} & 0.9 & Trains each tree on 90\% of data -- adds variance reduction\\
+\texttt{subsample} & 0.9 & Trains each tree on 90\% of data adds variance reduction\\
 \hline
-\texttt{colsample\_bytree} & 0.9 & Uses 90\% of features per tree -- reduces correlation between trees\\
+\texttt{colsample\_bytree} & 0.9 & Uses 90\% of features per tree reduces correlation between trees\\
 \hline
-\texttt{reg\_alpha} & 0.5 & L1 regularization -- encourages sparsity\\
+\texttt{reg\_alpha} & 0.5 & L1 regularization encourages sparsity\\
 \hline
-\texttt{reg\_lambda} & 1.0 & L2 regularization -- prevents large weights\\
+\texttt{reg\_lambda} & 1.0 & L2 regularization prevents large weights\\
 \hline
 \texttt{scale\_pos\_weight} & $\approx$30.25 & Computed from training data class ratio\\
 \hline
