@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.15)  13 MAY 2026 18:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.3.15)  13 MAY 2026 18:31
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1283,55 +1283,43 @@ Underfull \hbox (badness 10000) in paragraph at lines 64--64
  []
 
 [41] [42]
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 168.
- [43]
-Underfull \hbox (badness 10000) in paragraph at lines 242--242
+<images/threshold_terminal_output.png, id=1352, 723.9045pt x 175.857pt>
+File: images/threshold_terminal_output.png Graphic file (type png)
+<use images/threshold_terminal_output.png>
+Package pdftex.def Info: images/threshold_terminal_output.png  used on input line 163.
+(pdftex.def)             Requested size: 396.91325pt x 96.42378pt.
+ [43 <./images/threshold_terminal_output.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 239--239
 []|\T1/lmr/m/n/12 Logistic Re-gres-sion
  []
 
 
-Underfull \hbox (badness 4752) in paragraph at lines 244--244
+Underfull \hbox (badness 4752) in paragraph at lines 241--241
 []|\T1/lmr/m/n/12 Random For-est (no
  []
 
 
-Underfull \hbox (badness 3108) in paragraph at lines 246--246
+Underfull \hbox (badness 3108) in paragraph at lines 243--243
 []|\T1/lmr/m/n/12 XGBoost (no graph
  []
 
 
-Underfull \hbox (badness 7907) in paragraph at lines 248--248
+Underfull \hbox (badness 7907) in paragraph at lines 245--245
 []|\T1/lmr/m/n/12 XGBoost + Graph
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
-[]|\T1/lmr/bx/n/12 An In-tel-li-gent
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
-\T1/lmr/bx/n/12 Hy-brid Ma-chine
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
-\T1/lmr/bx/n/12 Learn-ing Frame-
- []
-
 [44]
-Underfull \hbox (badness 10000) in paragraph at lines 300--300
+Underfull \hbox (badness 10000) in paragraph at lines 297--297
 []|\T1/lmr/m/n/12 Night high-
  []
 
 
-Underfull \hbox (badness 5939) in paragraph at lines 300--300
+Underfull \hbox (badness 5939) in paragraph at lines 297--297
 \T1/lmr/m/n/12 day ac-count, ve-loc-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 304--304
+Underfull \hbox (badness 10000) in paragraph at lines 301--301
 []|\T1/lmr/m/n/12 Cross-state
  []
 
@@ -1402,20 +1390,20 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 4553FD0F88A6D5CA46F68A78B50D6907;22512.
+(rerunfilecheck)             Checksum: 62C5145D31AC582381BA68237E26BC84;22480.
  ) 
 Here is how much of TeX's memory you used:
- 31852 strings out of 467867
- 599388 string characters out of 5418334
- 1604623 words of memory out of 5000000
- 59437 multiletter control sequences out of 15000+600000
- 690384 words of font info for 84 fonts, out of 8000000 for 9000
+ 31847 strings out of 467867
+ 599491 string characters out of 5418334
+ 1604593 words of memory out of 5000000
+ 59434 multiletter control sequences out of 15000+600000
+ 686371 words of font info for 79 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  93i,13n,97p,1067b,2072s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmcsc10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmex10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi6.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi8.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr6.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr8.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmri12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy8.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtk10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtti10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (73 pages, 852832 bytes).
+<C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmbx12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmcsc10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmex10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi6.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmmi8.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr6.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr8.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmri12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmsy8.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtk10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtt12.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmtti10.pfb><C:/Users/smrut/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
+Output written on main.pdf (73 pages, 872222 bytes).
 PDF statistics:
- 1761 PDF objects out of 2073 (max. 8388607)
+ 1755 PDF objects out of 2073 (max. 8388607)
  720 named destinations out of 1000 (max. 500000)
- 13799 words of extra memory for PDF output out of 14400 (max. 10000000)
+ 13292 words of extra memory for PDF output out of 14400 (max. 10000000)
 

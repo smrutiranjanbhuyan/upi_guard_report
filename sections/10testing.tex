@@ -2,9 +2,9 @@
 
 \section{Testing Strategy}
 
-The testing approach for An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection covers three distinct areas: unit-level testing of the feature engineering functions, integration testing of the API endpoints, and model performance evaluation on held-out data.
+The testing approach for UPI-Guard++ covers three distinct areas: unit-level testing of the feature engineering functions, integration testing of the API endpoints, and model performance evaluation on held-out data.
 
-\subsection{Unit Testing -- Feature Engineering}
+\subsection{Unit Testing Feature Engineering}
 
 We manually verified the correctness of the \texttt{build\_features()} function by creating small synthetic DataFrames with known values and checking that the output features matched expectations. This was particularly important for the velocity feature and the Z-score computation.
 
@@ -37,7 +37,7 @@ Velocity: 5 txns in 1h & 5 rapid transactions & velocity = 5 & \checkmark\\
 \end{tabular}
 \end{table}
 
-\subsection{Integration Testing -- API Endpoint}
+\subsection{Integration Testing API Endpoint}
 
 The FastAPI endpoint was tested using a combination of the built-in Swagger UI (\texttt{/docs}) and direct Python requests. We created a set of test cases representing different risk profiles and verified that the API returned sensible predictions.
 
@@ -129,7 +129,7 @@ The optimal threshold of 0.18 (rather than the default 0.5) reflects the cost as
     \item \textbf{False Positives (440):} Legitimate transactions incorrectly flagged. These represent friction for real users. With $C_{FP} = \text{Rs.}\ 200$, this is an estimated operational cost of Rs.\ 88,000.
 \end{itemize}
 
-Total estimated financial loss on the test set: Rs.\ 3,63,000. Without the model (i.e., no detection at all), the cost would be $652 \times 5000 = \text{Rs.}\ 32,60,000$ -- about 9 times higher.
+Total estimated financial loss on the test set: Rs.\ 3,63,000. Without the model (i.e., no detection at all), the cost would be $652 \times 5000 = \text{Rs.}\ 32,60,000$ about 9 times higher.
 
 \subsection{Classification Report}
 
@@ -154,23 +154,20 @@ Weighted avg & 0.9879 & 0.9752 & 0.9814 & 20,000\\
 
 \subsection{Cost-Sensitive Threshold Analysis}
 
-The cost-based threshold optimization was run over the validation set, sweeping threshold values from 0.01 to 0.50. Figure~\ref{fig:threshold_curve} shows how the financial loss changes with the threshold.
+Threshold optimization was performed to identify a suitable threshold value for fraud detection. Different threshold values were tested on the validation dataset to reduce financial loss.
+
+The system selected an optimal threshold value of \textbf{0.18}. Lowering the threshold improved fraud detection compared to the default value of 0.5.
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.85\textwidth}{
-\centering
-\vspace{0.4cm}
-\textbf{[Placeholder: Threshold vs. Financial Loss Curve]}\\[0.2cm]
-\small
-The curve shows a steep decline in financial loss as the threshold drops from 0.5 to around 0.18, then a gradual increase as the threshold approaches 0.01 (due to increasing false positives). The minimum is at threshold $\approx 0.18$.
-\vspace{0.3cm}
-}}
-\caption{Financial loss as a function of decision threshold on validation set}
-\label{fig:threshold_curve}
+\includegraphics[width=0.9\textwidth]{threshold_terminal_output.png}
+\caption{Terminal Output of Threshold Optimization}
+\label{fig:threshold_terminal}
 \end{figure}
 
-At the default threshold of 0.5, many fraud cases are missed because the model's fraud probability is correct in direction but not magnitude -- it assigns suspicious probabilities in the range 0.2--0.4 to actual fraud cases. Lowering the threshold to 0.18 captures most of these borderline cases while only moderately increasing false positives.
+Figure~\ref{fig:threshold_terminal} shows the output of the threshold optimization process, including the best threshold value and minimum expected loss.
+
+
 
 \section{Feature Importance Analysis}
 
@@ -220,7 +217,7 @@ XGBoost provides built-in feature importance scores. The top features by importa
 Several things stand out from this ranking:
 
 \begin{itemize}
-    \item \textbf{Amount} is the strongest single predictor, which is expected -- fraudulent transactions tend to involve larger amounts.
+    \item \textbf{Amount} is the strongest single predictor, which is expected fraudulent transactions tend to involve larger amounts.
     \item \textbf{Account age} is the second most important feature, confirming the widely observed pattern that newly created accounts are disproportionately used for fraud.
     \item \textbf{Transaction velocity} is third, validating our investment in the rolling-window computation.
     \item \textbf{Amount Z-score} ranks fourth, showing that deviation from personal behavior is independently predictive beyond raw amount.
@@ -233,7 +230,7 @@ To quantify the contribution of the graph features and cost-sensitive threshold,
 
 \begin{table}[H]
 \centering
-\caption{Ablation Study -- Model Variants}
+\caption{Ablation Study Model Variants}
 \label{tab:ablation}
 \begin{tabular}{|p{4cm}|c|c|c|c|}
 \hline
@@ -247,12 +244,12 @@ XGBoost (no graph features) & 0.948 & 0.881 & 0.876 & Rs.\ 9,15,000\\
 \hline
 XGBoost + Graph (threshold=0.5) & 0.971 & 0.912 & 0.852 & Rs.\ 7,80,000\\
 \hline
-\textbf{An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection (full)} & \textbf{0.971} & \textbf{0.917} & \textbf{0.914} & \textbf{Rs.\ 3,63,000}\\
+\textbf{Final (full)} & \textbf{0.971} & \textbf{0.917} & \textbf{0.914} & \textbf{Rs.\ 3,63,000}\\
 \hline
 \end{tabular}
 \end{table}
 
-The results clearly demonstrate the compounding benefit of each component. The graph features alone improve ROC-AUC by about 2.3 percentage points over the no-graph XGBoost baseline. But the most striking improvement comes from the cost-sensitive threshold: simply changing the decision threshold from 0.5 to 0.18 (while keeping the same model) reduces financial loss from Rs.\ 7,80,000 to Rs.\ 3,63,000 -- a 53\% reduction -- by dramatically improving recall on fraud cases.
+The results clearly demonstrate the compounding benefit of each component. The graph features alone improve ROC-AUC by about 2.3 percentage points over the no-graph XGBoost baseline. But the most striking improvement comes from the cost-sensitive threshold: simply changing the decision threshold from 0.5 to 0.18 (while keeping the same model) reduces financial loss from Rs.\ 7,80,000 to Rs.\ 3,63,000 a 53\% reduction by dramatically improving recall on fraud cases.
 
 \section{API Performance Testing}
 

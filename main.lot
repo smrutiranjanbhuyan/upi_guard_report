@@ -16,7 +16,7 @@
 \contentsline {table}{\numberline {6.4}{\ignorespaces Confusion Matrix on Test Set (approx. 20,000 records)}}{42}{table.caption.19}%
 \contentsline {table}{\numberline {6.5}{\ignorespaces Detailed Classification Report}}{43}{table.caption.20}%
 \contentsline {table}{\numberline {6.6}{\ignorespaces Top 15 Feature Importances (XGBoost F-Score)}}{44}{table.caption.22}%
-\contentsline {table}{\numberline {6.7}{\ignorespaces Ablation Study -- Model Variants}}{45}{table.caption.23}%
+\contentsline {table}{\numberline {6.7}{\ignorespaces Ablation Study Model Variants}}{45}{table.caption.23}%
 \contentsline {table}{\numberline {6.8}{\ignorespaces API Performance Metrics}}{45}{table.caption.24}%
 \contentsline {table}{\numberline {6.9}{\ignorespaces Dashboard Manual Test Cases}}{46}{table.caption.25}%
 \addvspace {10\p@ }

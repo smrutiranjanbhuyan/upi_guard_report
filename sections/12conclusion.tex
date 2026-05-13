@@ -4,13 +4,13 @@
 
 This project set out to build a fraud detection system for UPI transactions that goes beyond simple rules and beyond the standard approach of training a classifier on raw transaction features. Looking back at what we built, we are genuinely satisfied with how it came together.
 
-The central thesis of An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection is that fraud detection works better when you think about it as a problem of understanding behavior, not just classifying individual data points. A single transaction is a limited view -- it tells you the amount, the time, the parties involved. But when you look at that transaction in context -- how does this amount compare to what this sender normally does? How many transactions has this sender made in the past hour? What does this sender's position in the broader transaction network look like? -- a much richer picture emerges, and that richness translates into better predictions.
+The central thesis of An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection is that fraud detection works better when you think about it as a problem of understanding behavior, not just classifying individual data points. A single transaction is a limited view it tells you the amount, the time, the parties involved. But when you look at that transaction in context how does this amount compare to what this sender normally does? How many transactions has this sender made in the past hour? What does this sender's position in the broader transaction network look like? a much richer picture emerges, and that richness translates into better predictions.
 
-The results back this up. Our final system achieves a ROC-AUC of approximately 0.97 and a fraud recall of over 91\%, which means it correctly identifies nine out of ten fraud cases. The ablation study showed that each component we added -- graph features, velocity modeling, behavioral profiling, Z-score anomaly detection, and cost-sensitive threshold optimization -- contributed meaningfully to the final result. Removing any one of them makes the system measurably worse.
+The results back this up. Our final system achieves a ROC-AUC of approximately 0.97 and a fraud recall of over 91\%, which means it correctly identifies nine out of ten fraud cases. The ablation study showed that each component we added graph features, velocity modeling, behavioral profiling, Z-score anomaly detection, and cost-sensitive threshold optimization contributed meaningfully to the final result. Removing any one of them makes the system measurably worse.
 
 The cost-sensitive threshold optimization deserves particular mention because it is the kind of insight that is easy to overlook if you are thinking purely about model accuracy. By explicitly modeling the financial cost of each type of error and choosing the threshold that minimizes total expected loss rather than maximizing F1-score, we reduced the projected financial loss on our test set by more than 50\% compared to using the same model with a default 0.5 threshold. This is a practical contribution that carries over directly to real-world deployment.
 
-The deployment layer -- FastAPI for programmatic access and Streamlit for analyst interaction -- demonstrates that this is not just an academic pipeline. Both interfaces are working, tested, and reasonably production-ready. The API's average latency of 18 milliseconds is well within the time budget for inline UPI fraud screening.
+The deployment layer FastAPI for programmatic access and Streamlit for analyst interaction demonstrates that this is not just an academic pipeline. Both interfaces are working, tested, and reasonably production-ready. The API's average latency of 18 milliseconds is well within the time budget for inline UPI fraud screening.
 
 In short, this project shows that with careful feature engineering, thoughtful handling of class imbalance, and explicit cost-aware decision making, it is possible to build a UPI fraud detector that substantially outperforms both rule-based baselines and simple ML approaches.
 
@@ -27,7 +27,7 @@ Being honest about what the system does not do well is as important as documenti
 
     \item \textbf{Single-hour velocity:} We compute velocity only in a one-hour window. Fraud patterns at different time scales (five minutes, one day, one week) might provide additional signal.
 
-    \item \textbf{No streaming support:} The system processes transactions in batch (for training) or one-at-a-time (for API inference). True streaming fraud detection -- processing a continuous flow of transactions with real-time feature computation -- requires different infrastructure.
+    \item \textbf{No streaming support:} The system processes transactions in batch (for training) or one-at-a-time (for API inference). True streaming fraud detection processing a continuous flow of transactions with real-time feature computation requires different infrastructure.
 \end{itemize}
 
 \section{Future Work}
@@ -44,7 +44,7 @@ The current system operates in batch mode for training and single-request mode f
 
 \subsection{SHAP Explainability}
 
-The system already includes a placeholder for SHAP (SHapley Additive exPlanations) integration in \texttt{src/explain.py}. SHAP provides model-agnostic feature attribution -- for any given prediction, it tells you exactly how much each feature contributed to pushing the probability up or down. This is valuable for two reasons: it helps analysts understand why a transaction was flagged (improving trust and compliance), and it helps identify when the model's reasoning is based on spurious correlations. Completing the SHAP integration is a priority for the next version.
+The system already includes a placeholder for SHAP (SHapley Additive exPlanations) integration in \texttt{src/explain.py}. SHAP provides model-agnostic feature attribution for any given prediction, it tells you exactly how much each feature contributed to pushing the probability up or down. This is valuable for two reasons: it helps analysts understand why a transaction was flagged (improving trust and compliance), and it helps identify when the model's reasoning is based on spurious correlations. Completing the SHAP integration is a priority for the next version.
 
 \subsection{Multi-Algorithm Ensemble}
 

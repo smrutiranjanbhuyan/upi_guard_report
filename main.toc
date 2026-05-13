@@ -82,8 +82,8 @@
 \contentsline {subsection}{\numberline {5.7.5}Testing the API with a Sample Request}{38}{subsection.5.7.5}%
 \contentsline {chapter}{\numberline {6}Testing and Results}{40}{chapter.6}%
 \contentsline {section}{\numberline {6.1}Testing Strategy}{40}{section.6.1}%
-\contentsline {subsection}{\numberline {6.1.1}Unit Testing -- Feature Engineering}{40}{subsection.6.1.1}%
-\contentsline {subsection}{\numberline {6.1.2}Integration Testing -- API Endpoint}{41}{subsection.6.1.2}%
+\contentsline {subsection}{\numberline {6.1.1}Unit Testing Feature Engineering}{40}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Integration Testing API Endpoint}{41}{subsection.6.1.2}%
 \contentsline {section}{\numberline {6.2}Model Performance Results}{41}{section.6.2}%
 \contentsline {subsection}{\numberline {6.2.1}Final Test Set Evaluation}{41}{subsection.6.2.1}%
 \contentsline {subsection}{\numberline {6.2.2}Confusion Matrix}{42}{subsection.6.2.2}%
@@ -92,7 +92,7 @@
 \contentsline {section}{\numberline {6.3}Feature Importance Analysis}{43}{section.6.3}%
 \contentsline {section}{\numberline {6.4}Comparison with Baseline Models}{44}{section.6.4}%
 \contentsline {section}{\numberline {6.5}API Performance Testing}{45}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Dashboard Testing}{46}{section.6.6}%
+\contentsline {section}{\numberline {6.6}Dashboard Testing}{45}{section.6.6}%
 \contentsline {chapter}{\numberline {7}Technologies and Tools Used}{47}{chapter.7}%
 \contentsline {section}{\numberline {7.1}Programming Language: Python}{47}{section.7.1}%
 \contentsline {section}{\numberline {7.2}Core Machine Learning Libraries}{47}{section.7.2}%
