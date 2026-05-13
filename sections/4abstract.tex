@@ -14,7 +14,7 @@ The Unified Payments Interface (UPI) has completely changed how people in India 
 
 \vspace{0.2in}
 
-\noindent To handle the severe class imbalance inherent in fraud data (where genuine fraud cases make up only a small fraction of all transactions), we used the \textbf{scale\_pos\_weight} parameter in XGBoost rather than SMOTE oversampling, which avoids introducing synthetic noise into the training set. We also implemented a \textbf{cost-sensitive threshold optimization} procedure that explicitly models the financial cost of each type of prediction error -- a missed fraud case costs far more than a wrongly flagged legitimate transaction -- and selects the decision threshold that minimizes total expected financial loss rather than simply maximizing accuracy.
+\noindent To handle the severe class imbalance inherent in fraud data (where genuine fraud cases make up only a small fraction of all transactions), we used the \textbf{scale\_pos\_weight} parameter in XGBoost rather than SMOTE oversampling, which avoids introducing synthetic noise into the training set. We also implemented a \textbf{cost-sensitive threshold optimization} procedure that explicitly models the financial cost of each type of prediction error a missed fraud case costs far more than a wrongly flagged legitimate transaction and selects the decision threshold that minimizes total expected financial loss rather than simply maximizing accuracy.
 
 \vspace{0.2in}
 
