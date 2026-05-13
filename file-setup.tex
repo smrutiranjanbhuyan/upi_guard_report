@@ -22,10 +22,12 @@
 \usepackage{amsmath, amsfonts, amsthm, amssymb}
 
 % ------------------------------ LISTS ------------------------------
-\usepackage{enumitem, multicol}
+\usepackage{enumitem}
+\usepackage{multicol}
 
 % ------------------------------ FIGURES ------------------------------
-\usepackage{graphicx, float}
+\usepackage{graphicx}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
 
@@ -110,8 +112,13 @@
 \renewcommand\cftafterloftitle{\par\noindent\rule{\textwidth}{2pt}\par\vskip -3.0em}
 \renewcommand\cftafterlottitle{\par\noindent\rule{\textwidth}{2pt}\par\vskip -3.0em}
 
+% ------------------------------ TIKZ DIAGRAMS ------------------------------
+\usepackage{tikz}
+\usetikzlibrary{positioning, shapes, arrows.meta}
+
 % ------------------------------ HYPERREF (LAST PACKAGE) ------------------------------
 \usepackage{hyperref}
+
 \hypersetup{
     colorlinks=true,
     linkcolor=black,

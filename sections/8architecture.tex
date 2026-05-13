@@ -1,4 +1,4 @@
-\chapter{System Architecture and Module Design}
+\chapter{System Architecture and Design}
 
 \section{Overall Architecture}
 
@@ -16,12 +16,12 @@ An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection is orga
 \\
 \textbf{[Layer 1] Data Layer}\\
 \texttt{data/upi\_transactions.csv}\\
-Raw UPI transaction records (100K rows)\\
+Raw UPI transaction records (100K+ rows)\\
 \\
 \hline
 \\
 \textbf{[Layer 2] Feature Engineering Layer}\\
-\texttt{src/preprocess.py -- build\_features()}\\
+\texttt{src/preprocess.py build\_features()}\\
 Temporal, Velocity, Behavioral, Graph, Cross-State, Encoding\\
 \\
 \hline
@@ -39,13 +39,13 @@ XGBoost Training + Cost-Sensitive Threshold Selection\\
 \hline
 \\
 \textbf{[Layer 5] API Layer}\\
-\texttt{api/main.py} -- FastAPI REST Endpoint\\
-POST /predict -- returns fraud probability + decision\\
+\texttt{api/main.py} FastAPI REST Endpoint\\
+POST /predict returns fraud probability + decision\\
 \\
 \hline
 \\
 \textbf{[Layer 6] User Interface Layer}\\
-\texttt{ui/dashboard.py} -- Streamlit Dashboard\\
+\texttt{ui/dashboard.py} Streamlit Dashboard\\
 Interactive transaction analyzer + risk gauge\\
 \\
 \hline
@@ -61,41 +61,43 @@ Interactive transaction analyzer + risk gauge\\
 The repository follows a clean, modular layout that separates concerns clearly:
 
 \begin{verbatim}
+
+
 upi-guard/
 |
-|-- data/
-|   +-- upi_transactions.csv          (Raw dataset)
+|data/
+|   +upi_transactions.csv          (Raw dataset)
 |
-|-- model/
-|   |-- fraud_model.pkl               (Trained XGBoost model)
-|   |-- feature_columns.pkl           (Feature list from training)
-|   +-- threshold.pkl                 (Optimal decision threshold)
+|model/
+|   |fraud_model.pkl               (Trained XGBoost model)
+|   |feature_columns.pkl           (Feature list from training)
+|   +threshold.pkl                 (Optimal decision threshold)
 |
-|-- src/
-|   |-- preprocess.py                 (All feature engineering)
-|   |-- train.py                      (Model training script)
-|   |-- optimize_threshold.py         (Post-hoc threshold tuning)
-|   +-- explain.py                    (SHAP explainability - future)
+|src/
+|   |preprocess.py                 (All feature engineering)
+|   |train.py                      (Model training script)
+|   |optimize_threshold.py         (Post-hoc threshold tuning)
+|   +explain.py                    (SHAP explainability - future)
 |
-|-- api/
-|   +-- main.py                       (FastAPI application)
+|api/
+|   +main.py                       (FastAPI application)
 |
-|-- ui/
-|   +-- dashboard.py                  (Streamlit dashboard)
+|ui/
+|   +dashboard.py                  (Streamlit dashboard)
 |
-|-- requirements.txt                  (Python dependencies)
-+-- README.md                         (Project documentation)
+|requirements.txt                  (Python dependencies)
++README.md                         (Project documentation)
 \end{verbatim}
 
 \section{Module Descriptions}
 
-\subsection{preprocess.py -- Feature Engineering Module}
+\subsection{preprocess.py Feature Engineering Module}
 
 \label{sec:preprocess_module}
 
 The preprocessing module is the most critical component of the system. It contains a single public function, \texttt{build\_features(df)}, which accepts a pandas DataFrame of raw transaction records and returns an enriched DataFrame with all engineered features added.
 
-This module is imported and called in three different places: \texttt{train.py} during model training, \texttt{optimize\_threshold.py} during threshold selection, and \texttt{api/main.py} during live prediction. This design ensures that the transformation applied to training data is identical to the transformation applied to incoming API requests -- a critical requirement for consistent model behavior.
+This module is imported and called in three different places: \texttt{train.py} during model training, \texttt{optimize\_threshold.py} during threshold selection, and \texttt{api/main.py} during live prediction. This design ensures that the transformation applied to training data is identical to the transformation applied to incoming API requests a critical requirement for consistent model behavior.
 
 The function is divided into eight clearly labeled stages:
 
@@ -110,7 +112,7 @@ The function is divided into eight clearly labeled stages:
     \item Categorical encoding (one-hot encoding via get\_dummies)
 \end{enumerate}
 
-\subsection{train.py -- Model Training Module}
+\subsection{train.py Model Training Module}
 
 The training module orchestrates the complete model training workflow. Its responsibilities are:
 
@@ -128,9 +130,9 @@ The training module orchestrates the complete model training workflow. Its respo
 
 The module is designed to be run once as a script (\texttt{python src/train.py}) and produces three artifacts: \texttt{fraud\_model.pkl}, \texttt{feature\_columns.pkl}, and \texttt{threshold.pkl}.
 
-\subsection{optimize\_threshold.py -- Threshold Optimization Module}
+\subsection{optimize\_threshold.py Threshold Optimization Module}
 
-This module provides a standalone version of threshold optimization that can be run independently on a trained model. Its primary use case is re-optimizing the threshold without retraining the model -- for example, if the cost parameters ($C_{FN}$, $C_{FP}$) need to be updated based on new business requirements.
+This module provides a standalone version of threshold optimization that can be run independently on a trained model. Its primary use case is re-optimizing the threshold without retraining the model for example, if the cost parameters ($C_{FN}$, $C_{FP}$) need to be updated based on new business requirements.
 
 The module loads the saved model and dataset, computes the feature matrix, splits the data, generates probability predictions on the test set, and then scans threshold values from 0.1 to 0.9 in steps of 0.01 to find the threshold that minimizes total financial loss under the specified cost model.
 
@@ -155,7 +157,7 @@ print("Best Threshold:", round(best_threshold, 3))
 print("Minimum Expected Loss:", lowest_loss)
 \end{lstlisting}
 
-\subsection{api/main.py -- FastAPI REST API Module}
+\subsection{api/main.py FastAPI REST API Module}
 
 The API module serves the trained model as a REST endpoint using FastAPI. It loads the three model artifacts at startup (model, feature columns, threshold) and exposes a single endpoint:
 
@@ -197,12 +199,12 @@ def predict(data: dict):
 
 An important design decision here is the \texttt{reindex} call. Because \texttt{get\_dummies()} during training will produce different column sets depending on which categorical values were present in the full training data, a single-record prediction at inference time may have a different set of one-hot columns. The \texttt{reindex(columns=features, fill\_value=0)} call aligns the inference DataFrame to exactly match the training columns, inserting zeros for any categories not present in the single inference record. This is a critical step for production reliability.
 
-\subsection{ui/dashboard.py -- Streamlit Dashboard Module}
+\subsection{ui/dashboard.py Streamlit Dashboard Module}
 
 The dashboard module provides an interactive web interface for transaction risk assessment. It is organized into two panels:
 
 \begin{itemize}
-    \item \textbf{Left panel (Input):} A form where analysts can enter transaction parameters -- date and time, amount, transaction type, merchant category, sender/receiver geography and bank, device type, network type, account age, and transaction velocity.
+    \item \textbf{Left panel (Input):} A form where analysts can enter transaction parameters date and time, amount, transaction type, merchant category, sender/receiver geography and bank, device type, network type, account age, and transaction velocity.
     \item \textbf{Right panel (Output):} A Plotly gauge chart showing the fraud risk percentage, a decision badge (green for Safe, red for Fraud), a trust score metric, and a breakdown of which risk factors contributed most to the assessment.
 \end{itemize}
 
@@ -210,15 +212,13 @@ The dashboard implements a heuristic scoring model that mirrors the trained ML m
 
 \begin{figure}[H]
 \centering
-\fbox{\parbox{0.88\textwidth}{
-\centering
-\vspace{0.3cm}
-\textbf{[Placeholder: Screenshot of Streamlit Dashboard showing risk gauge]}\\
-\small (Run \texttt{python -m streamlit run ui/dashboard.py} to view)
-\vspace{0.3cm}
-}}
-\caption{Streamlit dashboard -- fraud risk assessment console}
+
+\includegraphics[width=0.9\textwidth]{dashboard.png}
+
+\caption{Streamlit Dashboard Showing Fraud Risk Analysis}
 \label{fig:dashboard}
+
+
 \end{figure}
 
 \section{Data Flow for a Live Prediction Request}

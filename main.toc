@@ -45,15 +45,15 @@
 \contentsline {subsection}{\numberline {3.5.3}XGBoost Hyperparameters}{18}{subsection.3.5.3}%
 \contentsline {section}{\numberline {3.6}Cost-Sensitive Threshold Optimization}{19}{section.3.6}%
 \contentsline {section}{\numberline {3.7}Evaluation Metrics}{20}{section.3.7}%
-\contentsline {chapter}{\numberline {4}System Architecture and Module Design}{21}{chapter.4}%
+\contentsline {chapter}{\numberline {4}System Architecture and Design}{21}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Overall Architecture}{21}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Project Folder Structure}{22}{section.4.2}%
 \contentsline {section}{\numberline {4.3}Module Descriptions}{23}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}preprocess.py -- Feature Engineering Module}{23}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}train.py -- Model Training Module}{24}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}optimize\_threshold.py -- Threshold Optimization Module}{25}{subsection.4.3.3}%
-\contentsline {subsection}{\numberline {4.3.4}api/main.py -- FastAPI REST API Module}{25}{subsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.3.5}ui/dashboard.py -- Streamlit Dashboard Module}{26}{subsection.4.3.5}%
+\contentsline {subsection}{\numberline {4.3.1}preprocess.py Feature Engineering Module}{23}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}train.py Model Training Module}{24}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}optimize\_threshold.py Threshold Optimization Module}{25}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}api/main.py FastAPI REST API Module}{25}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}ui/dashboard.py Streamlit Dashboard Module}{26}{subsection.4.3.5}%
 \contentsline {section}{\numberline {4.4}Data Flow for a Live Prediction Request}{27}{section.4.4}%
 \contentsline {section}{\numberline {4.5}Model Artifacts and Serialization}{28}{section.4.5}%
 \contentsline {chapter}{\numberline {5}Implementation}{29}{chapter.5}%
