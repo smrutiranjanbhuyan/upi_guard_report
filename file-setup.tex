@@ -1,0 +1,120 @@
+% ------------------------------ SETTINGS ------------------------------
+\usepackage{geometry}
+\usepackage{tocloft}
+
+\geometry{
+    paper=a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=3cm,
+    right=2.5cm,
+    headheight=1cm,
+    footskip=1.5cm,
+    headsep=0.8cm,
+}
+
+% ------------------------------ ENCODING & FONTS ------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
+% ------------------------------ MATHEMATICS ------------------------------
+\usepackage{amsmath, amsfonts, amsthm, amssymb}
+
+% ------------------------------ LISTS ------------------------------
+\usepackage{enumitem, multicol}
+
+% ------------------------------ FIGURES ------------------------------
+\usepackage{graphicx, float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% ------------------------------ TABLES ------------------------------
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+% ------------------------------ CODE LISTINGS ------------------------------
+\usepackage{listings}
+
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codeframe}{RGB}{200,200,200}
+\definecolor{commentcolor}{RGB}{106,153,85}
+\definecolor{keywordcolor}{RGB}{86,156,214}
+\definecolor{stringcolor}{RGB}{206,145,120}
+\definecolor{numbercolor}{RGB}{120,120,120}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{codebg},
+    commentstyle=\color{commentcolor}\itshape,
+    keywordstyle=\color{keywordcolor}\bfseries,
+    stringstyle=\color{stringcolor},
+    numberstyle=\tiny\color{numbercolor},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=8pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{codeframe},
+    xleftmargin=15pt,
+    framexleftmargin=15pt,
+    language=Python,
+}
+
+\lstset{style=pythonstyle}
+
+% ------------------------------ LINE SPACING ------------------------------
+\usepackage{setspace}
+\onehalfspacing
+
+% ------------------------------ TOC DEPTH ------------------------------
+\setcounter{tocdepth}{3}
+
+% ------------------------------ TEXT JUSTIFICATION ------------------------------
+\usepackage{ragged2e}
+\justifying
+
+% ------------------------------ MICROTYPE ------------------------------
+\usepackage{microtype}
+\microtypesetup{expansion=false}
+\emergencystretch=3em
+
+% ------------------------------ HEADER/FOOTER ------------------------------
+\usepackage{fancyhdr}
+
+% ------------------------------ CHAPTER TITLE ------------------------------
+\usepackage{titlesec}
+
+\titleformat{\chapter}[hang]
+  {\normalfont\huge\bfseries\raggedright}
+  {\thechapter.}
+  {1em}
+  {}
+
+% ------------------------------ IMAGE PATH ------------------------------
+\graphicspath{{images/}{./}}
+
+% ------------------------------ TOC STYLING ------------------------------
+\renewcommand\cftaftertoctitle{\par\noindent\rule{\textwidth}{2pt}\par\vskip -3.5em}
+\renewcommand\cftafterloftitle{\par\noindent\rule{\textwidth}{2pt}\par\vskip -3.0em}
+\renewcommand\cftafterlottitle{\par\noindent\rule{\textwidth}{2pt}\par\vskip -3.0em}
+
+% ------------------------------ HYPERREF (LAST PACKAGE) ------------------------------
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black,
+}

@@ -1,0 +1,467 @@
+\chapter{Implementation}
+
+\section{Development Environment}
+
+The project was developed and tested in the following environment:
+
+\begin{table}[H]
+\centering
+\caption{Development Environment Specifications}
+\label{tab:devenv}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Component} & \textbf{Details}\\
+\hline
+Operating System & Windows 11 / Ubuntu 22.04 LTS\\
+\hline
+Python Version & Python 3.10.x\\
+\hline
+Virtual Environment & venv (standard Python)\\
+\hline
+IDE & Visual Studio Code\\
+\hline
+Key Libraries & See Table~\ref{tab:dependencies}\\
+\hline
+Version Control & Git + GitHub\\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Python Library Dependencies}
+\label{tab:dependencies}
+\begin{tabular}{|l|l|p{5cm}|}
+\hline
+\textbf{Library} & \textbf{Version} & \textbf{Purpose}\\
+\hline
+pandas & $\geq$2.0 & Data loading, manipulation, rolling window operations\\
+\hline
+numpy & $\geq$1.24 & Numerical operations, threshold scanning\\
+\hline
+scikit-learn & $\geq$1.3 & Train/test split, metrics, confusion matrix\\
+\hline
+xgboost & $\geq$2.0 & Gradient boosting classifier\\
+\hline
+networkx & $\geq$3.0 & Transaction graph construction and centrality\\
+\hline
+imbalanced-learn & $\geq$0.11 & SMOTE and resampling utilities\\
+\hline
+fastapi & $\geq$0.100 & REST API framework\\
+\hline
+uvicorn & $\geq$0.23 & ASGI server for FastAPI\\
+\hline
+streamlit & $\geq$1.25 & Interactive dashboard\\
+\hline
+plotly & $\geq$5.15 & Gauge charts and visualizations in dashboard\\
+\hline
+shap & $\geq$0.42 & SHAP explainability (planned for next version)\\
+\hline
+requests & $\geq$2.31 & HTTP client for API testing\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Installation and Setup}
+
+\subsection{Cloning the Repository}
+
+\begin{lstlisting}[language=bash, caption={Repository setup commands}]
+git clone https://github.com/smrutiranjanbhuyan/upi-guard.git
+cd upi-guard
+\end{lstlisting}
+
+\subsection{Creating the Virtual Environment}
+
+\begin{lstlisting}[language=bash, caption={Virtual environment setup}]
+# Create virtual environment
+python -m venv venv
+
+# Activate on Windows
+.\venv\Scripts\Activate.ps1
+
+# Activate on Linux/macOS
+source venv/bin/activate
+\end{lstlisting}
+
+\subsection{Installing Dependencies}
+
+\begin{lstlisting}[language=bash, caption={Installing project dependencies}]
+pip install -r requirements.txt
+\end{lstlisting}
+
+\section{Implementation of the Preprocessing Module}
+
+\subsection{Complete build\_features() Function}
+
+The complete preprocessing module (\texttt{src/preprocess.py}) is the backbone of the system. Below is an annotated walkthrough of its implementation.
+
+\begin{lstlisting}[caption={Stage 1 -- Data cleaning and timestamp parsing}, label={lst:stage1}]
+def build_features(df):
+    df = df.copy()  # Avoid mutating the original DataFrame
+
+    # Parse timestamps from string to datetime
+    df["timestamp"] = pd.to_datetime(df["timestamp"],
+                                      errors="coerce")
+    # Drop records where timestamp parsing failed
+    df = df.dropna(subset=["timestamp"])
+
+    # Sort by sender and time -- essential for rolling windows
+    df = df.sort_values(["sender_id", "timestamp"])
+\end{lstlisting}
+
+The \texttt{df.copy()} call at the start is important: it prevents the function from modifying the original DataFrame passed by the caller, which could cause subtle bugs if the caller reuses that DataFrame after the function returns.
+
+\begin{lstlisting}[caption={Stage 2 -- Temporal feature extraction}, label={lst:stage2}]
+    df["hour"] = df["timestamp"].dt.hour
+    df["day_of_week"] = df["timestamp"].dt.dayofweek
+    df["is_weekend"] = (df["day_of_week"] >= 5).astype(int)
+    df["month"] = df["timestamp"].dt.month
+
+    # Night transactions: 12:00 AM to 5:00 AM
+    df["is_night"] = (
+        (df["hour"] >= 0) & (df["hour"] <= 5)
+    ).astype(int)
+
+    # Salary week: first 7 days of the month
+    df["is_salary_week"] = (
+        df["timestamp"].dt.day <= 7
+    ).astype(int)
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Stage 3 -- Transaction velocity with rolling window}, label={lst:stage3}]
+    # Must set timestamp as index for time-based rolling
+    df = df.set_index("timestamp")
+
+    df["txn_velocity_1h"] = (
+        df.groupby("sender_id")["amount"]
+        .rolling("1h")         # 1-hour time window
+        .count()               # Count transactions in window
+        .reset_index(level=0, drop=True)
+    )
+
+    df = df.reset_index()
+    df["txn_velocity_1h"] = df["txn_velocity_1h"].fillna(1)
+\end{lstlisting}
+
+The \texttt{reset\_index(level=0, drop=True)} call in the rolling computation is a pandas idiom that removes the grouped key (\texttt{sender\_id}) from the multi-level index returned by \texttt{groupby().rolling()}, leaving only the timestamp index to be re-merged with the original DataFrame.
+
+\begin{lstlisting}[caption={Stage 4 -- Behavioral profiling per sender}, label={lst:stage4}]
+    # Average transaction amount for this sender
+    df["sender_mean_amt"] = (
+        df.groupby("sender_id")["amount"].transform("mean")
+    )
+
+    # Standard deviation of amounts
+    df["sender_std_amt"] = (
+        df.groupby("sender_id")["amount"].transform("std")
+    )
+
+    # Total transactions from this sender
+    df["sender_txn_count"] = (
+        df.groupby("sender_id")["amount"].transform("count")
+    )
+
+    # Number of unique counterparties
+    df["unique_receivers"] = (
+        df.groupby("sender_id")["receiver_id"]
+        .transform("nunique")
+    )
+
+    # Z-score: how unusual is this amount for this sender?
+    df["amount_zscore"] = (
+        (df["amount"] - df["sender_mean_amt"]) /
+        (df["sender_std_amt"] + 1e-5)
+    )
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Stage 5 -- Graph construction and centrality features}, label={lst:stage5}]
+    G = nx.from_pandas_edgelist(
+        df,
+        source="sender_id",
+        target="receiver_id",
+        create_using=nx.DiGraph()   # Directed graph
+    )
+
+    # PageRank: measure of node importance/centrality
+    pagerank = nx.pagerank(G)
+
+    # Degree centrality: fraction of nodes connected to
+    degree = nx.degree_centrality(G)
+
+    # Map graph metrics back to each row
+    df["sender_pagerank"] = df["sender_id"].map(pagerank)
+    df["sender_degree"]   = df["sender_id"].map(degree)
+
+    # Fill for any senders not found in graph (shouldn't
+    # happen, but defensive programming)
+    df["sender_pagerank"] = df["sender_pagerank"].fillna(0)
+    df["sender_degree"]   = df["sender_degree"].fillna(0)
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Stages 6-8 -- Cross-state flag, encoding, cleanup}, label={lst:stages6_8}]
+    # Cross-state transaction flag
+    if ("sender_state" in df.columns and
+            "receiver_state" in df.columns):
+        df["cross_state"] = (
+            df["sender_state"] != df["receiver_state"]
+        ).astype(int)
+
+    # One-hot encode categorical features
+    categorical_cols = [
+        "transaction_type", "merchant_category",
+        "sender_state",     "receiver_state",
+        "sender_bank",      "receiver_bank",
+        "device_type",      "network_type"
+    ]
+
+    existing_cols = [c for c in categorical_cols
+                     if c in df.columns]
+
+    df = pd.get_dummies(df, columns=existing_cols,
+                        drop_first=True)
+
+    # Final cleanup: replace NaN with 0
+    df = df.fillna(0)
+
+    return df
+\end{lstlisting}
+
+\section{Implementation of the Training Module}
+
+\subsection{Data Loading and Feature Building}
+
+\begin{lstlisting}[caption={Data loading and feature building in train.py}, label={lst:trainload}]
+import pandas as pd
+import numpy as np
+import pickle
+import xgboost as xgb
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import (classification_report,
+    roc_auc_score, confusion_matrix,
+    average_precision_score, accuracy_score)
+from preprocess import build_features
+
+df = pd.read_csv("../data/upi_100k_ultra_realistic.csv")
+df = build_features(df)
+
+drop_cols = ["fraud_flag", "transaction_id",
+             "timestamp", "sender_id", "receiver_id"]
+
+X = df.drop(columns=[c for c in drop_cols if c in df.columns])
+y = df["fraud_flag"]
+\end{lstlisting}
+
+\subsection{Data Splitting}
+
+\begin{lstlisting}[caption={Stratified three-way data split}, label={lst:split}]
+# First split: 80% temp, 20% test
+X_temp, X_test, y_temp, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Second split: 80% train, 20% validation (of temp set)
+X_train, X_val, y_train, y_val = train_test_split(
+    X_temp, y_temp, test_size=0.2,
+    stratify=y_temp, random_state=42
+)
+\end{lstlisting}
+
+\subsection{Class Imbalance Handling and Model Training}
+
+\begin{lstlisting}[caption={Imbalance weighting and XGBoost training}, label={lst:training}]
+# Compute class weight ratio
+scale_pos_weight = (
+    (len(y_train) - sum(y_train)) / sum(y_train)
+)
+
+model = xgb.XGBClassifier(
+    n_estimators=800,
+    max_depth=10,
+    learning_rate=0.02,
+    min_child_weight=5,
+    gamma=1,
+    subsample=0.9,
+    colsample_bytree=0.9,
+    reg_alpha=0.5,
+    reg_lambda=1,
+    scale_pos_weight=scale_pos_weight,
+    eval_metric="aucpr",
+    random_state=42,
+    n_jobs=-1
+)
+
+model.fit(X_train, y_train)
+\end{lstlisting}
+
+\subsection{Threshold Optimization}
+
+\begin{lstlisting}[caption={Validation-set cost-based threshold finding}, label={lst:thresh}]
+C_FN = 5000   # Rs. cost per missed fraud
+C_FP = 200    # Rs. cost per false positive
+
+val_proba = model.predict_proba(X_val)[:, 1]
+
+def find_best_threshold(y_true, y_prob):
+    best_threshold = 0.5
+    lowest_loss = float("inf")
+
+    for t in np.arange(0.01, 0.5, 0.01):
+        y_pred_temp = (y_prob >= t).astype(int)
+        tn, fp, fn, tp = confusion_matrix(
+            y_true, y_pred_temp).ravel()
+        loss = (fn * C_FN) + (fp * C_FP)
+
+        if loss < lowest_loss:
+            lowest_loss = loss
+            best_threshold = t
+
+    return best_threshold, lowest_loss
+
+best_threshold, val_loss = find_best_threshold(
+    y_val, val_proba)
+\end{lstlisting}
+
+\subsection{Model Persistence}
+
+\begin{lstlisting}[caption={Saving trained model artifacts}, label={lst:save}]
+pickle.dump(model,
+    open("../model/fraud_model.pkl", "wb"))
+pickle.dump(X.columns,
+    open("../model/feature_columns.pkl", "wb"))
+pickle.dump(best_threshold,
+    open("../model/threshold.pkl", "wb"))
+
+print("Model, Features, Threshold Saved Successfully")
+\end{lstlisting}
+
+\section{Implementation of the FastAPI Endpoint}
+
+\begin{lstlisting}[caption={FastAPI application setup and model loading}, label={lst:fastapisetup}]
+from fastapi import FastAPI
+import pickle
+import pandas as pd
+import os, sys
+
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
+from src.preprocess import build_features
+
+app = FastAPI()
+
+# Load model artifacts at application startup
+model     = pickle.load(open(
+    os.path.join(BASE_DIR, "model", "fraud_model.pkl"), "rb"))
+features  = pickle.load(open(
+    os.path.join(BASE_DIR, "model", "feature_columns.pkl"), "rb"))
+threshold_path = os.path.join(BASE_DIR, "model", "threshold.txt")
+threshold = float(open(threshold_path).read()) \
+    if os.path.exists(threshold_path) else 0.5
+\end{lstlisting}
+
+Loading model artifacts at startup (rather than on each request) is essential for performance. Loading a pickle file takes tens of milliseconds; doing it once at startup means that prediction latency is almost entirely determined by the model inference time, not I/O.
+
+\section{Implementation of the Streamlit Dashboard}
+
+\subsection{Session State Management}
+
+The dashboard uses Streamlit's session state mechanism to persist prediction results between user interactions:
+
+\begin{lstlisting}[caption={Session state initialization}, label={lst:sessionstate}]
+for k in ["prob", "decision", "contributors"]:
+    if k not in st.session_state:
+        st.session_state[k] = None
+\end{lstlisting}
+
+Without this initialization, accessing \texttt{st.session\_state.prob} before any prediction has been run would raise a \texttt{KeyError}. Initializing all state keys to \texttt{None} at startup is the standard Streamlit pattern for handling this.
+
+\subsection{Risk Gauge Visualization}
+
+\begin{lstlisting}[caption={Plotly gauge chart for fraud risk display}, label={lst:gauge}]
+import plotly.graph_objects as go
+
+fig = go.Figure(go.Indicator(
+    mode="gauge+number",
+    value=pct,  # Fraud probability as percentage
+    title={'text': "Fraud Risk (%)"},
+    gauge={
+        'axis': {'range': [0, 100]},
+        'steps': [
+            {'range': [0,  25], 'color': '#00ff9d'},
+            {'range': [25, 50], 'color': '#ffaa00'},
+            {'range': [50, 75], 'color': '#ff5733'},
+            {'range': [75,100], 'color': '#ff0033'}
+        ]
+    }
+))
+st.plotly_chart(fig, use_container_width=True)
+\end{lstlisting}
+
+The gauge has four color zones: green (0-25\%, low risk), amber (25-50\%, moderate risk), orange-red (50-75\%, high risk), and deep red (75-100\%, very high risk). This color coding allows an analyst to assess risk at a glance without reading the exact number.
+
+\section{Running the System}
+
+\subsection{Training the Model}
+
+\begin{lstlisting}[language=bash, caption={Commands to train the model}]
+cd src
+python train.py
+\end{lstlisting}
+
+\subsection{Optimizing the Threshold}
+
+\begin{lstlisting}[language=bash, caption={Commands to optimize the threshold}]
+cd src
+python optimize_threshold.py
+\end{lstlisting}
+
+\subsection{Starting the API Server}
+
+\begin{lstlisting}[language=bash, caption={Starting the FastAPI server}]
+cd upi-guard
+python -m uvicorn api.main:app --reload
+# API available at: http://127.0.0.1:8000
+# Swagger docs at: http://127.0.0.1:8000/docs
+\end{lstlisting}
+
+\subsection{Starting the Dashboard}
+
+\begin{lstlisting}[language=bash, caption={Starting the Streamlit dashboard}]
+# In a separate terminal
+python -m streamlit run ui/dashboard.py
+# Dashboard available at: http://localhost:8501
+\end{lstlisting}
+
+\subsection{Testing the API with a Sample Request}
+
+\begin{lstlisting}[language=Python, caption={Sample API request using Python requests library}]
+import requests
+
+payload = {
+    "transaction_id": "TXN_TEST_001",
+    "timestamp": "2024-06-15 02:30:00",
+    "sender_id": "USER_12345",
+    "receiver_id": "USER_99999",
+    "amount": 48000,
+    "transaction_type": "P2P",
+    "merchant_category": "Retail",
+    "sender_state": "Maharashtra",
+    "receiver_state": "Delhi",
+    "sender_bank": "HDFC",
+    "receiver_bank": "SBI",
+    "device_type": "Android",
+    "network_type": "4G",
+    "account_age_days": 15,
+    "txn_velocity_1h": 6
+}
+
+response = requests.post(
+    "http://127.0.0.1:8000/predict",
+    json=payload
+)
+
+print(response.json())
+# Expected output (high-risk transaction):
+# {"fraud_probability": 0.921, "decision": "Fraud"}
+\end{lstlisting}

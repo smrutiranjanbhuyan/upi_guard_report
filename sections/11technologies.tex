@@ -1,0 +1,104 @@
+\chapter{Technologies and Tools Used}
+
+\section{Programming Language: Python}
+
+The entire An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection system is implemented in Python 3.10. Python's dominance in data science and machine learning applications comes from its combination of readable syntax, an enormous ecosystem of scientific libraries, and strong community support.
+
+For this project specifically, Python offered several advantages: the same language handles data processing (pandas, numpy), model training (scikit-learn, xgboost), graph analysis (networkx), API serving (fastapi), and dashboard building (streamlit). This means the team only needed to maintain expertise in a single language across the entire stack.
+
+\section{Core Machine Learning Libraries}
+
+\subsection{XGBoost}
+
+XGBoost (eXtreme Gradient Boosting) \cite{chen2016} is an open-source implementation of gradient boosted decision trees optimized for speed and performance. It was developed by Tianqi Chen and has become one of the most widely used machine learning libraries for structured/tabular data.
+
+Key features that made XGBoost the right choice for this project:
+
+\begin{itemize}
+    \item \textbf{scale\_pos\_weight:} Native support for class-imbalanced learning without requiring external resampling.
+    \item \textbf{PR-AUC optimization:} The \texttt{eval\_metric="aucpr"} option allows the boosting process itself to optimize toward the precision-recall curve, which is more appropriate than accuracy for our imbalanced problem.
+    \item \textbf{Regularization:} Built-in L1 (\texttt{reg\_alpha}) and L2 (\texttt{reg\_lambda}) regularization prevents overfitting.
+    \item \textbf{Parallelism:} The \texttt{n\_jobs=-1} parameter distributes tree construction across all available CPU cores, making training significantly faster on multi-core machines.
+    \item \textbf{Pickle compatibility:} The trained model can be saved and loaded using Python's standard pickle module.
+\end{itemize}
+
+\subsection{scikit-learn}
+
+scikit-learn provides the utility functions used throughout the project: \texttt{train\_test\_split()} for stratified data splitting, \texttt{confusion\_matrix()} for evaluation, \texttt{roc\_auc\_score()} and \texttt{average\_precision\_score()} for performance metrics, and \texttt{classification\_report()} for formatted evaluation output. Its consistent API design makes it easy to swap algorithms in and out for comparison experiments.
+
+\subsection{pandas and NumPy}
+
+pandas is the core data manipulation library. The entire feature engineering pipeline relies on pandas operations: groupby for behavioral profiling, rolling for velocity computation, get\_dummies for one-hot encoding, and to\_datetime for timestamp handling. NumPy provides the array operations and numerical utilities (including \texttt{np.arange} for threshold scanning and the various mathematical operations in the Z-score computation).
+
+\section{Graph Analysis: NetworkX}
+
+NetworkX is a Python library for creating, manipulating, and studying the structure, dynamics, and functions of complex networks. In An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection, it is used to:
+
+\begin{itemize}
+    \item Construct a directed graph (\texttt{nx.DiGraph}) from the transaction DataFrame using \texttt{nx.from\_pandas\_edgelist()}.
+    \item Compute PageRank centrality using \texttt{nx.pagerank()}, which implements the iterative power method.
+    \item Compute degree centrality using \texttt{nx.degree\_centrality()}.
+\end{itemize}
+
+The graph for the full 100,000-transaction dataset contains approximately 50,000--80,000 unique nodes (account IDs) and 100,000 directed edges (transactions). NetworkX handles this graph efficiently in memory, and the PageRank computation converges in under a minute on standard hardware.
+
+\section{API Framework: FastAPI}
+
+FastAPI is a modern, high-performance web framework for building REST APIs in Python. It is built on Starlette (for the web layer) and Pydantic (for data validation) and supports asynchronous request handling via Python's \texttt{asyncio}.
+
+\begin{itemize}
+    \item \textbf{Performance:} FastAPI is one of the fastest Python web frameworks available, capable of handling hundreds of requests per second on a single core.
+    \item \textbf{Automatic documentation:} FastAPI automatically generates interactive Swagger UI documentation at \texttt{/docs} and ReDoc at \texttt{/redoc}, making the API immediately usable and testable without any additional code.
+    \item \textbf{Type safety:} FastAPI uses Python type hints to automatically validate input data and provide clear error messages when the request format is wrong.
+\end{itemize}
+
+\subsection{Uvicorn}
+
+Uvicorn is the ASGI (Asynchronous Server Gateway Interface) server used to run the FastAPI application. It is highly efficient and supports HTTP/1.1, HTTP/2, and WebSockets. The command \texttt{python -m uvicorn api.main:app --reload} starts the server with auto-reload enabled (suitable for development; the \texttt{--reload} flag should be removed in production).
+
+\section{Dashboard: Streamlit}
+
+Streamlit is a Python library that turns Python scripts into interactive web applications without requiring any front-end development knowledge. It is widely used in the data science community for building proof-of-concept dashboards, model monitoring tools, and data exploration interfaces.
+
+In An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection, Streamlit is used to build the fraud risk console that allows analysts to:
+
+\begin{itemize}
+    \item Enter transaction parameters via form controls (number inputs, sliders, selectboxes, date/time pickers).
+    \item Trigger a risk assessment with a single button click.
+    \item View the result as a color-coded gauge chart (powered by Plotly).
+    \item Inspect the raw JSON payload that would be sent to the ML model.
+    \item See a breakdown of which risk factors contributed most to the assessment.
+\end{itemize}
+
+\section{Data Visualization: Plotly}
+
+Plotly is an interactive data visualization library used in the dashboard to render the fraud risk gauge chart. Unlike static matplotlib charts, Plotly visualizations are interactive in the browser -- users can hover over data points, zoom, and pan. The \texttt{go.Indicator} chart type used for the gauge provides a professional, easy-to-read risk display that communicates the assessment at a glance.
+
+\section{Version Control: Git and GitHub}
+
+The project source code is hosted on GitHub at \url{https://github.com/smrutiranjanbhuyan/upi-guard}. Git was used throughout development for version control, with commits made at each meaningful milestone. GitHub provides public access to the code for review and reproducibility.
+
+\section{Development Tools}
+
+\begin{table}[H]
+\centering
+\caption{Development Tools Summary}
+\label{tab:tools}
+\begin{tabular}{|l|l|p{5.5cm}|}
+\hline
+\textbf{Tool} & \textbf{Type} & \textbf{Use}\\
+\hline
+Visual Studio Code & IDE & Primary development environment\\
+\hline
+Jupyter Notebook & Interactive & Exploratory data analysis and prototyping\\
+\hline
+Git & Version Control & Source code management\\
+\hline
+GitHub & Repository Hosting & Code sharing and collaboration\\
+\hline
+Postman & API Testing & Testing FastAPI endpoints during development\\
+\hline
+pip / venv & Package Management & Dependency management\\
+\hline
+\end{tabular}
+\end{table}

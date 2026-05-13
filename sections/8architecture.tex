@@ -1,0 +1,263 @@
+\chapter{System Architecture and Module Design}
+
+\section{Overall Architecture}
+
+An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection is organized as a multi-layer system with four distinct concerns: data processing and feature engineering, model training and optimization, API serving, and user interface. These layers communicate through serialized model artifacts and shared preprocessing logic, ensuring that the same feature transformations applied during training are faithfully reproduced at inference time.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.88\textwidth}{
+\centering
+\vspace{0.4cm}
+\Large\textbf{An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection System Architecture}\\[0.5cm]
+\normalsize
+\begin{tabular}{|c|}
+\hline
+\\
+\textbf{[Layer 1] Data Layer}\\
+\texttt{data/upi\_transactions.csv}\\
+Raw UPI transaction records (100K rows)\\
+\\
+\hline
+\\
+\textbf{[Layer 2] Feature Engineering Layer}\\
+\texttt{src/preprocess.py -- build\_features()}\\
+Temporal, Velocity, Behavioral, Graph, Cross-State, Encoding\\
+\\
+\hline
+\\
+\textbf{[Layer 3] Training \& Optimization Layer}\\
+\texttt{src/train.py} + \texttt{src/optimize\_threshold.py}\\
+XGBoost Training + Cost-Sensitive Threshold Selection\\
+\\
+\hline
+\\
+\textbf{[Layer 4] Model Storage Layer}\\
+\texttt{model/fraud\_model.pkl} + \texttt{model/feature\_columns.pkl}\\
+\texttt{model/threshold.pkl}\\
+\\
+\hline
+\\
+\textbf{[Layer 5] API Layer}\\
+\texttt{api/main.py} -- FastAPI REST Endpoint\\
+POST /predict -- returns fraud probability + decision\\
+\\
+\hline
+\\
+\textbf{[Layer 6] User Interface Layer}\\
+\texttt{ui/dashboard.py} -- Streamlit Dashboard\\
+Interactive transaction analyzer + risk gauge\\
+\\
+\hline
+\end{tabular}
+\vspace{0.4cm}
+}}
+\caption{Layered architecture of the An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection system}
+\label{fig:architecture}
+\end{figure}
+
+\section{Project Folder Structure}
+
+The repository follows a clean, modular layout that separates concerns clearly:
+
+\begin{verbatim}
+upi-guard/
+|
+|-- data/
+|   +-- upi_transactions.csv          (Raw dataset)
+|
+|-- model/
+|   |-- fraud_model.pkl               (Trained XGBoost model)
+|   |-- feature_columns.pkl           (Feature list from training)
+|   +-- threshold.pkl                 (Optimal decision threshold)
+|
+|-- src/
+|   |-- preprocess.py                 (All feature engineering)
+|   |-- train.py                      (Model training script)
+|   |-- optimize_threshold.py         (Post-hoc threshold tuning)
+|   +-- explain.py                    (SHAP explainability - future)
+|
+|-- api/
+|   +-- main.py                       (FastAPI application)
+|
+|-- ui/
+|   +-- dashboard.py                  (Streamlit dashboard)
+|
+|-- requirements.txt                  (Python dependencies)
++-- README.md                         (Project documentation)
+\end{verbatim}
+
+\section{Module Descriptions}
+
+\subsection{preprocess.py -- Feature Engineering Module}
+
+\label{sec:preprocess_module}
+
+The preprocessing module is the most critical component of the system. It contains a single public function, \texttt{build\_features(df)}, which accepts a pandas DataFrame of raw transaction records and returns an enriched DataFrame with all engineered features added.
+
+This module is imported and called in three different places: \texttt{train.py} during model training, \texttt{optimize\_threshold.py} during threshold selection, and \texttt{api/main.py} during live prediction. This design ensures that the transformation applied to training data is identical to the transformation applied to incoming API requests -- a critical requirement for consistent model behavior.
+
+The function is divided into eight clearly labeled stages:
+
+\begin{enumerate}
+    \item Basic cleaning and timestamp parsing
+    \item Temporal feature extraction (hour, day, night flag, salary week)
+    \item Transaction velocity computation (1-hour rolling window)
+    \item Behavioral profiling (per-sender mean, std, count, unique receivers)
+    \item Z-score anomaly computation
+    \item Graph construction and centrality feature extraction
+    \item Cross-state flag computation
+    \item Categorical encoding (one-hot encoding via get\_dummies)
+\end{enumerate}
+
+\subsection{train.py -- Model Training Module}
+
+The training module orchestrates the complete model training workflow. Its responsibilities are:
+
+\begin{itemize}
+    \item Loading the raw dataset from \texttt{data/upi\_transactions.csv}
+    \item Calling \texttt{build\_features()} to generate the full feature matrix
+    \item Dropping non-predictive identifier columns (transaction\_id, sender\_id, receiver\_id, timestamp)
+    \item Performing stratified train/validation/test splits
+    \item Computing the \texttt{scale\_pos\_weight} from the training set
+    \item Training the XGBoost classifier with the configured hyperparameters
+    \item Running cost-sensitive threshold optimization on the validation set
+    \item Evaluating the model on the held-out test set
+    \item Saving the trained model, feature column list, and optimal threshold to disk
+\end{itemize}
+
+The module is designed to be run once as a script (\texttt{python src/train.py}) and produces three artifacts: \texttt{fraud\_model.pkl}, \texttt{feature\_columns.pkl}, and \texttt{threshold.pkl}.
+
+\subsection{optimize\_threshold.py -- Threshold Optimization Module}
+
+This module provides a standalone version of threshold optimization that can be run independently on a trained model. Its primary use case is re-optimizing the threshold without retraining the model -- for example, if the cost parameters ($C_{FN}$, $C_{FP}$) need to be updated based on new business requirements.
+
+The module loads the saved model and dataset, computes the feature matrix, splits the data, generates probability predictions on the test set, and then scans threshold values from 0.1 to 0.9 in steps of 0.01 to find the threshold that minimizes total financial loss under the specified cost model.
+
+\begin{lstlisting}[caption={Core threshold optimization loop from optimize\_threshold.py}, label={lst:thresh_loop}]
+thresholds = np.arange(0.1, 0.9, 0.01)
+C_FN = 5000   # Cost of missed fraud
+C_FP = 200    # Cost of false alarm
+
+best_threshold = 0
+lowest_loss = float("inf")
+
+for t in thresholds:
+    y_pred = (y_proba > t).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    loss = (C_FN * fn) + (C_FP * fp)
+
+    if loss < lowest_loss:
+        lowest_loss = loss
+        best_threshold = t
+
+print("Best Threshold:", round(best_threshold, 3))
+print("Minimum Expected Loss:", lowest_loss)
+\end{lstlisting}
+
+\subsection{api/main.py -- FastAPI REST API Module}
+
+The API module serves the trained model as a REST endpoint using FastAPI. It loads the three model artifacts at startup (model, feature columns, threshold) and exposes a single endpoint:
+
+\begin{itemize}
+    \item \textbf{Method:} POST
+    \item \textbf{Path:} \texttt{/predict}
+    \item \textbf{Input:} JSON object containing transaction fields
+    \item \textbf{Output:} JSON object with \texttt{fraud\_probability} and \texttt{decision} fields
+\end{itemize}
+
+The predict function converts the incoming JSON payload to a DataFrame, applies \texttt{build\_features()} for feature engineering, aligns the resulting columns to match the training feature set (using \texttt{reindex} with zero-fill for any missing columns), and then runs the model to produce a probability and decision.
+
+\begin{lstlisting}[caption={FastAPI predict endpoint implementation}, label={lst:api}]
+@app.post("/predict")
+def predict(data: dict):
+    # Convert to DataFrame
+    df = pd.DataFrame([data])
+
+    # Apply same feature engineering as training
+    df = build_features(df)
+
+    # Drop non-model columns if present
+    df = df.drop(columns=[
+        "transaction_id", "timestamp",
+        "sender_id", "receiver_id", "fraud_flag"
+    ], errors="ignore")
+
+    # Align columns to training feature set
+    df = df.reindex(columns=features, fill_value=0)
+
+    prob = model.predict_proba(df)[0][1]
+    decision = "Fraud" if prob > threshold else "Safe"
+
+    return {
+        "fraud_probability": float(prob),
+        "decision": decision
+    }
+\end{lstlisting}
+
+An important design decision here is the \texttt{reindex} call. Because \texttt{get\_dummies()} during training will produce different column sets depending on which categorical values were present in the full training data, a single-record prediction at inference time may have a different set of one-hot columns. The \texttt{reindex(columns=features, fill\_value=0)} call aligns the inference DataFrame to exactly match the training columns, inserting zeros for any categories not present in the single inference record. This is a critical step for production reliability.
+
+\subsection{ui/dashboard.py -- Streamlit Dashboard Module}
+
+The dashboard module provides an interactive web interface for transaction risk assessment. It is organized into two panels:
+
+\begin{itemize}
+    \item \textbf{Left panel (Input):} A form where analysts can enter transaction parameters -- date and time, amount, transaction type, merchant category, sender/receiver geography and bank, device type, network type, account age, and transaction velocity.
+    \item \textbf{Right panel (Output):} A Plotly gauge chart showing the fraud risk percentage, a decision badge (green for Safe, red for Fraud), a trust score metric, and a breakdown of which risk factors contributed most to the assessment.
+\end{itemize}
+
+The dashboard implements a heuristic scoring model that mirrors the trained ML model's key patterns, making it useful for demonstration and analyst training even when the full API backend is not running.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.88\textwidth}{
+\centering
+\vspace{0.3cm}
+\textbf{[Placeholder: Screenshot of Streamlit Dashboard showing risk gauge]}\\
+\small (Run \texttt{python -m streamlit run ui/dashboard.py} to view)
+\vspace{0.3cm}
+}}
+\caption{Streamlit dashboard -- fraud risk assessment console}
+\label{fig:dashboard}
+\end{figure}
+
+\section{Data Flow for a Live Prediction Request}
+
+The sequence of operations for a single prediction request via the API is as follows:
+
+\begin{enumerate}
+    \item Client sends a POST request to \texttt{/predict} with transaction JSON payload.
+    \item FastAPI deserializes the JSON into a Python dictionary.
+    \item The dictionary is wrapped in a pandas DataFrame (single row).
+    \item \texttt{build\_features()} is called on this single-row DataFrame, adding temporal, behavioral, graph, and other features.
+    \item The \texttt{fraud\_flag}, \texttt{transaction\_id}, \texttt{sender\_id}, \texttt{receiver\_id}, and \texttt{timestamp} columns are dropped if present.
+    \item The column list is aligned to the training feature set via \texttt{reindex}.
+    \item \texttt{model.predict\_proba()} generates the fraud probability.
+    \item The probability is compared to the stored threshold; a decision label is produced.
+    \item The response JSON (\texttt{fraud\_probability}, \texttt{decision}) is returned to the client.
+\end{enumerate}
+
+The entire process, from receiving the request to returning the response, completes in well under 100 milliseconds on standard hardware, making it suitable for inline transaction screening.
+
+\section{Model Artifacts and Serialization}
+
+Three files are written to the \texttt{model/} directory after training:
+
+\begin{table}[H]
+\centering
+\caption{Saved Model Artifacts}
+\label{tab:artifacts}
+\begin{tabular}{|l|l|p{5.5cm}|}
+\hline
+\textbf{Filename} & \textbf{Format} & \textbf{Contents}\\
+\hline
+fraud\_model.pkl & Python pickle & Trained XGBoost classifier object\\
+\hline
+feature\_columns.pkl & Python pickle & Ordered list of feature column names from training\\
+\hline
+threshold.pkl & Python pickle & Optimal decision threshold (float)\\
+\hline
+\end{tabular}
+\end{table}
+
+Pickle is used for serialization because all three artifacts are pure Python objects and XGBoost's built-in pickle support is stable and well-tested. In a production setting, XGBoost's native JSON serialization format would be preferred for portability, but pickle is sufficient for this academic deployment.

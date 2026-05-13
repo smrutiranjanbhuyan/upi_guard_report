@@ -1,0 +1,29 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\thispagestyle{plain}
+
+The Unified Payments Interface (UPI) has completely changed how people in India handle everyday money transfers. With billions of transactions happening every month, it is one of the largest real-time payment systems in the world. But this rapid growth has also made it an attractive target for fraudsters who are constantly finding new ways to trick users and exploit vulnerabilities. Traditional fraud detection systems, which rely on simple rule sets like blocking large transactions or flagging unusual login times, are no longer enough. Fraudsters have figured out how to work around these rules, and the losses keep climbing.
+
+\vspace{0.2in}
+
+\noindent This project, \textbf{``An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection''}, is our attempt to build something better. Instead of relying on manually written rules, we designed a machine learning pipeline that learns what fraud looks like directly from transaction data. The system combines several different techniques that, together, give a much richer picture of each transaction than any single method could provide on its own.
+
+\vspace{0.2in}
+
+\noindent At the core of our approach is an \textbf{XGBoost classifier} trained on a real-world UPI fraud dataset sourced from Kaggle, containing approximately 100,000 transaction records. Before training, we spent considerable effort on \textbf{feature engineering}. We extracted temporal signals (hour of day, whether the transaction happened at night, whether it fell during salary week), computed \textbf{transaction velocity features} using one-hour rolling windows, built \textbf{behavioural profiles} for each sender based on their historical patterns, and calculated \textbf{Z-score anomaly scores} to flag unusual amounts. Most distinctively, we constructed a \textbf{directed transaction graph} from the entire dataset and computed network-level features including PageRank and degree centrality for each sender node, capturing patterns of money flow that are invisible to non-graph methods.
+
+\vspace{0.2in}
+
+\noindent To handle the severe class imbalance inherent in fraud data (where genuine fraud cases make up only a small fraction of all transactions), we used the \textbf{scale\_pos\_weight} parameter in XGBoost rather than SMOTE oversampling, which avoids introducing synthetic noise into the training set. We also implemented a \textbf{cost-sensitive threshold optimization} procedure that explicitly models the financial cost of each type of prediction error -- a missed fraud case costs far more than a wrongly flagged legitimate transaction -- and selects the decision threshold that minimizes total expected financial loss rather than simply maximizing accuracy.
+
+\vspace{0.2in}
+
+\noindent The trained model is deployed through two interfaces: a \textbf{FastAPI REST endpoint} that accepts transaction data and returns a fraud probability and decision in real time, and a \textbf{Streamlit dashboard} that provides an interactive, visual interface for analysts to investigate individual transactions and understand which risk factors contributed most to the model's output.
+
+\vspace{0.2in}
+
+\noindent Our system achieves a \textbf{ROC-AUC of approximately 0.97} and a fraud recall exceeding 90\% on the held-out test set, with a precision of around 89\%. These results show that the combination of graph features, temporal modeling, and cost-sensitive learning meaningfully outperforms conventional approaches, and that UPI fraud detection is a problem where thoughtful feature engineering matters as much as, if not more than, the choice of algorithm.
+
+\vspace{0.3in}
+
+\noindent\textbf{Keywords:} UPI Fraud Detection, XGBoost, Graph Neural Features, PageRank, Transaction Velocity, Behavioral Profiling, Cost-Sensitive Learning, FastAPI, Streamlit, Anomaly Detection

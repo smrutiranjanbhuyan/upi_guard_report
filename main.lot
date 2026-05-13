@@ -1,0 +1,24 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {2.1}{\ignorespaces Comparison of Existing Approaches and An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection}}{10}{table.caption.5}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces Original Dataset Fields}}{13}{table.caption.7}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces XGBoost Model Hyperparameters}}{19}{table.caption.10}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Saved Model Artifacts}}{28}{table.caption.13}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Development Environment Specifications}}{29}{table.caption.14}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Python Library Dependencies}}{29}{table.caption.15}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {6.1}{\ignorespaces Feature Engineering Unit Test Cases}}{40}{table.caption.16}%
+\contentsline {table}{\numberline {6.2}{\ignorespaces API Integration Test Cases}}{41}{table.caption.17}%
+\contentsline {table}{\numberline {6.3}{\ignorespaces Final Model Performance Metrics on Test Set}}{42}{table.caption.18}%
+\contentsline {table}{\numberline {6.4}{\ignorespaces Confusion Matrix on Test Set (approx. 20,000 records)}}{42}{table.caption.19}%
+\contentsline {table}{\numberline {6.5}{\ignorespaces Detailed Classification Report}}{43}{table.caption.20}%
+\contentsline {table}{\numberline {6.6}{\ignorespaces Top 15 Feature Importances (XGBoost F-Score)}}{44}{table.caption.22}%
+\contentsline {table}{\numberline {6.7}{\ignorespaces Ablation Study -- Model Variants}}{45}{table.caption.23}%
+\contentsline {table}{\numberline {6.8}{\ignorespaces API Performance Metrics}}{45}{table.caption.24}%
+\contentsline {table}{\numberline {6.9}{\ignorespaces Dashboard Manual Test Cases}}{46}{table.caption.25}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {7.1}{\ignorespaces Development Tools Summary}}{50}{table.caption.26}%
+\addvspace {10\p@ }

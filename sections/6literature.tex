@@ -1,0 +1,128 @@
+\chapter{Literature Review}
+
+\section{Introduction}
+
+Pick up any smartphone in an Indian household today and there is a very good chance it has at least one UPI app installed on it. PhonePe, Google Pay, Paytm, BHIM -- these names have become as familiar to most Indians as the banks behind them. In cities, in towns, in villages and marketplaces, people who had never owned a credit card have quietly become confident digital payment users. That shift happened faster than almost anyone predicted, and it has genuinely changed everyday life for millions of people.
+
+But with every rupee that moves through these systems, there is someone somewhere trying to intercept it. Fraud in the UPI ecosystem takes many shapes -- phone calls from fake bank employees, tampered QR codes, phishing links sent over messaging apps, and social engineering attacks that manipulate victims into authorizing payments themselves. These attacks target people, not just systems, and people make mistakes.
+
+Detecting these attacks automatically -- before the money is gone -- is the problem this project is built around. This chapter surveys what researchers and practitioners have already tried, how well those approaches have worked, and what gaps remain. Understanding the existing landscape is the first step toward building something genuinely better.
+
+\section{The Rule-Based Era}
+
+For a long time, fraud detection meant writing rules. A team of analysts would study confirmed fraud cases, identify patterns, and translate those patterns into explicit conditions: flag any transaction above rupees ten thousand made between midnight and 5 AM, or any account that initiates more than fifteen transfers in a single hour.
+
+This approach has real virtues. It is fast, transparent, and auditable -- when someone asks why a transaction was flagged, there is always a clear answer. But it has one fundamental limitation: it can only catch fraud that someone already anticipated. The moment a fraudster tries something slightly different, the rules miss it entirely. Maintaining rule sets requires constant manual effort, and the people maintaining them are always reacting to yesterday's patterns.
+
+In the UPI context, this limitation is particularly acute because the attack surface is so broad. Fraud can arrive through social engineering, through technical exploits, through account takeover, through merchant-side tampering, or through more subtle patterns like coordinated mule networks. No finite set of rules can cover all these possibilities in advance.
+
+\section{Machine Learning Approaches to Fraud Detection}
+
+\subsection{Logistic Regression}
+
+Logistic Regression was among the first machine learning methods applied to fraud detection, and it remains relevant in settings where interpretability is paramount. Khedekar and Manerkar (2025) \cite{khedekar2025} applied logistic regression to UPI fraud data and found it produced acceptable precision for straightforward fraud patterns but struggled with non-linear interactions between features. Its main advantage is that the model's coefficients can be directly inspected and explained to regulators or compliance teams. When a feature like \texttt{is\_night} has a positive coefficient, it is easy to communicate what that means.
+
+The limitation is that logistic regression assumes linear relationships between features and the log-odds of fraud. In practice, fraud signals are rarely linear -- the risk associated with a large late-night transaction from a new account is not simply the sum of each risk individually, it is multiplicatively higher. Non-linear classifiers handle this better.
+
+\subsection{Random Forest}
+
+Random Forest approaches the problem from a very different direction. Instead of fitting a single model, it builds a large collection of decision trees, each trained on a slightly different random subset of data and features, and combines their votes. This ensemble approach gives it robustness that single models rarely achieve.
+
+Malode et al. (2025) \cite{malode2025} compared Random Forest against logistic regression on UPI transaction data and found consistent advantages for Random Forest, particularly in recall -- that is, the ability to correctly identify actual fraud cases. The feature importance scores produced by Random Forest also turned out to be practically useful, confirming that transaction amount, account age, and transaction frequency were the strongest signals.
+
+\subsection{Gradient Boosting: XGBoost and LightGBM}
+
+Gradient boosting methods, particularly XGBoost (Chen and Guestrin, 2016) \cite{chen2016} and LightGBM, have become the dominant approach in financial fraud detection benchmarks. Both work through sequential refinement: each new tree in the sequence focuses specifically on the cases that previous trees got wrong, gradually building a powerful composite classifier.
+
+Kamble et al. (2025) \cite{kamble2025} used stacked generalization -- training multiple base classifiers and combining their outputs as features for a meta-learner -- on UPI fraud data and found that including an XGBoost component was critical to achieving high performance on imbalanced datasets. Their work reinforced the community's understanding that XGBoost's built-in \texttt{scale\_pos\_weight} mechanism is one of the more effective ways to handle class imbalance without introducing the noise that oversampling methods like SMOTE can bring.
+
+\subsection{Neural Networks and Deep Learning}
+
+Several researchers have explored deep learning approaches for fraud detection. Recurrent neural networks (RNNs) and Long Short-Term Memory (LSTM) networks are especially attractive for transaction data because they can model temporal sequences -- not just the features of a single transaction, but how that transaction relates to the stream of prior transactions from the same sender.
+
+However, for UPI fraud specifically, deep learning approaches face practical challenges. They require substantially more data to train reliably, they are significantly harder to interpret (which matters for regulatory compliance and customer dispute resolution), and they are slower to run at inference time. For a system that needs to produce predictions in real time during a transaction, these factors matter.
+
+The consensus in recent literature suggests that well-engineered gradient boosting approaches, particularly when combined with carefully designed temporal and behavioral features, typically match or come close to deep learning performance on structured tabular fraud data while being far easier to deploy and maintain.
+
+\section{Handling Class Imbalance}
+
+Class imbalance is arguably the most practically important challenge in fraud detection. Nearly every paper in this space grapples with it. The approaches broadly fall into three categories.
+
+\textbf{Oversampling} techniques create synthetic examples of the minority class. SMOTE (Synthetic Minority Over-sampling Technique), introduced by Chawla et al. (2002) \cite{chawla2002}, generates new minority samples by interpolating between existing ones. While effective at balancing training sets, SMOTE introduces synthetic noise that can sometimes degrade model performance, particularly when the real fraud patterns are clustered in narrow regions of feature space.
+
+\textbf{Undersampling} removes majority class examples to create a more balanced dataset. This is simpler but wasteful -- it discards real information that the model could have learned from.
+
+\textbf{Algorithmic approaches} address imbalance within the model itself. XGBoost's \texttt{scale\_pos\_weight} parameter multiplies the gradient contribution of positive (fraud) class examples by a fixed weight during training, effectively telling the model to pay more attention to fraud cases. This is the approach adopted in this project, for the reasons Kamble et al. (2025) articulate: it avoids introducing synthetic data artifacts while still directing the model's learning appropriately.
+
+\section{Graph-Based Fraud Detection}
+
+One of the more interesting developments in financial fraud detection research in recent years has been the application of graph analysis to payment networks. The basic intuition is simple: fraud rarely happens in isolation. Money mule networks involve coordinated groups of accounts passing funds through a chain. Repeat fraudsters reuse certain receiver accounts. Suspicious patterns of fund flow can show up as structural anomalies in the transaction graph even when individual transactions look normal.
+
+Hu et al. (2022) \cite{hu2022} demonstrated graph-based fraud detection in the context of mobile social networks, using graph centrality features as inputs to a gradient boosting classifier. Their key finding was that accounts at the center of suspicious transaction clusters -- those with high degree centrality or elevated PageRank scores -- were disproportionately involved in fraud. This result has been replicated in other settings.
+
+Our project applies this approach to UPI transactions by constructing a directed graph where nodes represent UPI account IDs (senders and receivers) and edges represent individual transactions. For each sender, we compute two graph features: \textbf{PageRank}, which measures how central and ``trusted'' a node is relative to the rest of the graph, and \textbf{degree centrality}, which simply captures how many unique connections a node has. Fraudulent senders often exhibit either very high degree centrality (touching many different receivers, consistent with money mule behavior) or unusual PageRank values that stand out from typical user patterns.
+
+\section{Cost-Sensitive Learning}
+
+Standard classification metrics like accuracy and F1-score treat all errors equally. In fraud detection, they do not deserve equal treatment. Missing a fraud case -- a false negative -- means a victim loses money. Incorrectly flagging a legitimate transaction -- a false positive -- means inconveniencing a real customer and potentially damaging their trust in the system. These two mistakes have very different real-world costs.
+
+Cost-sensitive learning explicitly incorporates these asymmetric costs into the model training or decision process. One common approach, and the one adopted in this project, is post-hoc threshold optimization: train the model normally to produce fraud probabilities, then select the decision threshold that minimizes the expected financial loss under a specified cost model rather than the threshold that maximizes accuracy.
+
+If we define $C_{FN}$ as the cost per missed fraud case and $C_{FP}$ as the cost per false alarm, then for a given threshold $t$ and test set, the total financial loss is:
+
+\begin{equation}
+L(t) = C_{FN} \times FN(t) + C_{FP} \times FP(t)
+\end{equation}
+
+where $FN(t)$ and $FP(t)$ are the counts of false negatives and false positives at threshold $t$. The optimal threshold is:
+
+\begin{equation}
+t^* = \arg\min_{t \in [0,1]} \left[ C_{FN} \times FN(t) + C_{FP} \times FP(t) \right]
+\end{equation}
+
+In our system, we set $C_{FN} = 5000$ (representing the average loss from a missed fraud case, in rupees) and $C_{FP} = 200$ (representing the cost of blocking a legitimate transaction, including customer service overhead and trust damage). The resulting optimal threshold is typically lower than 0.5, meaning the model is biased toward flagging suspicious transactions rather than letting borderline cases through.
+
+\section{Deployment Architectures}
+
+Much of the fraud detection literature focuses on model development and evaluation without addressing how the model gets deployed in practice. Recent work has highlighted the importance of end-to-end thinking -- a model that achieves great results in a Jupyter notebook but cannot be productionized efficiently provides limited real-world value.
+
+FastAPI has emerged as a popular choice for serving machine learning models as REST endpoints in Python. It is fast (comparable to Node.js in benchmark tests), easy to use, provides automatic API documentation via Swagger UI, and integrates cleanly with the Python data science stack. Streamlit, meanwhile, has become the standard tool for building data exploration dashboards without requiring front-end development expertise.
+
+This project adopts both tools, combining a FastAPI backend for programmatic API access with a Streamlit dashboard for human analyst use, reflecting the typical architecture of real-world fraud operations platforms.
+
+\section{Research Gaps and Our Contribution}
+
+Reviewing the existing literature, several gaps stand out:
+
+\begin{enumerate}
+    \item Most published work on UPI fraud detection evaluates models on standard metrics without addressing the cost-asymmetry inherent in the problem.
+    \item Graph features have been studied in general financial fraud contexts but have seen limited application specifically to UPI transaction graphs.
+    \item Few papers combine temporal velocity modeling, behavioral profiling, and graph features into a single integrated pipeline.
+    \item End-to-end deployed systems with both API and interactive dashboard components are rarely described.
+\end{enumerate}
+
+This project addresses all four gaps: we integrate graph features, temporal velocity, behavioral anomaly scoring, and cost-sensitive threshold optimization into a single pipeline, and we deploy the result as both a REST API and an interactive dashboard.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of Existing Approaches and An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection}
+\label{tab:literature_comparison}
+\begin{tabular}{|p{3.5cm}|c|c|c|c|c|}
+\hline
+\textbf{Approach} & \textbf{Graph} & \textbf{Velocity} & \textbf{Behavioral} & \textbf{Cost-} & \textbf{Deployed}\\
+ & \textbf{Features} & \textbf{Features} & \textbf{Profiling} & \textbf{Sensitive} & \textbf{API}\\
+\hline
+Kamble et al. (2025) & No & No & No & No & No\\
+\hline
+Khedekar \& Manerkar (2025) & No & No & No & No & No\\
+\hline
+Malode et al. (2025) & No & No & No & No & No\\
+\hline
+Hu et al. (2022) & Yes & No & No & Yes & No\\
+\hline
+\textbf{An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection (Ours)} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes} & \textbf{Yes}\\
+\hline
+\end{tabular}
+\end{table}
+
+As Table~\ref{tab:literature_comparison} shows, An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection is the only approach in the recent literature to combine all five of these elements. This combination is what we believe gives it its competitive edge over single-technique approaches.

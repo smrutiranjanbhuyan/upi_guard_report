@@ -1,0 +1,330 @@
+\chapter{Methodology}
+
+\section{Overview of the Approach}
+
+The methodology behind An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection is best understood as a pipeline with several distinct stages, each of which addresses a specific challenge in the fraud detection problem. Rather than treating model training as the only thing that matters and treating everything else as overhead, we invested roughly equal effort in data preprocessing, feature engineering, training, threshold optimization, and deployment. In our experience, the quality of the engineered features matters more than the specific algorithm chosen.
+
+Figure~\ref{fig:pipeline} illustrates the high-level pipeline.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.85\textwidth}{
+\centering
+\vspace{0.3cm}
+\texttt{Raw Transaction Data (CSV)}\\
+$\downarrow$\\
+\texttt{Data Cleaning \& Timestamp Parsing}\\
+$\downarrow$\\
+\texttt{Temporal Feature Extraction}\\
+$\downarrow$\\
+\texttt{Transaction Velocity Computation (Rolling Window)}\\
+$\downarrow$\\
+\texttt{Behavioral Profiling (Per-Sender Statistics)}\\
+$\downarrow$\\
+\texttt{Z-Score Anomaly Detection}\\
+$\downarrow$\\
+\texttt{Graph Construction (Directed) \& Centrality Features}\\
+$\downarrow$\\
+\texttt{Cross-State Feature Engineering}\\
+$\downarrow$\\
+\texttt{Categorical Encoding (One-Hot)}\\
+$\downarrow$\\
+\texttt{Train / Validation / Test Split (Stratified)}\\
+$\downarrow$\\
+\texttt{XGBoost Training (scale\_pos\_weight)}\\
+$\downarrow$\\
+\texttt{Cost-Sensitive Threshold Optimization}\\
+$\downarrow$\\
+\texttt{Final Evaluation on Held-Out Test Set}\\
+$\downarrow$\\
+\texttt{Model Serialization + API Deployment}
+\vspace{0.3cm}
+}}
+\caption{End-to-end pipeline of the An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection system}
+\label{fig:pipeline}
+\end{figure}
+
+\section{Dataset}
+
+\subsection{Source and Size}
+
+The project uses a UPI transaction fraud dataset sourced from Kaggle, specifically the ``UPI Transaction 2024: Advanced Analysis Dataset'' contributed by Yogeshwar Choudhary \cite{kaggle2024}. The dataset contains approximately 100,000 transaction records designed to reflect patterns observed in real UPI fraud cases.
+
+\subsection{Dataset Fields}
+
+Table~\ref{tab:dataset_fields} lists the original fields present in the dataset before any feature engineering.
+
+\begin{table}[H]
+\centering
+\caption{Original Dataset Fields}
+\label{tab:dataset_fields}
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Field Name} & \textbf{Type} & \textbf{Description}\\
+\hline
+transaction\_id & String & Unique identifier for the transaction\\
+\hline
+timestamp & Datetime & Date and time the transaction occurred\\
+\hline
+sender\_id & String & Anonymized identifier of the sending account\\
+\hline
+receiver\_id & String & Anonymized identifier of the receiving account\\
+\hline
+amount & Float & Transaction amount in Indian Rupees\\
+\hline
+transaction\_type & Categorical & P2P (Person-to-Person) or P2M (Person-to-Merchant)\\
+\hline
+merchant\_category & Categorical & Category of merchant (Grocery, Retail, Travel, etc.)\\
+\hline
+sender\_state & Categorical & Indian state of the sender\\
+\hline
+receiver\_state & Categorical & Indian state of the receiver\\
+\hline
+sender\_bank & Categorical & Sending bank name\\
+\hline
+receiver\_bank & Categorical & Receiving bank name\\
+\hline
+device\_type & Categorical & Android or iOS\\
+\hline
+network\_type & Categorical & 4G, 5G, or WiFi\\
+\hline
+account\_age\_days & Integer & Age of the sender's account in days\\
+\hline
+fraud\_flag & Binary & 1 = fraudulent transaction, 0 = legitimate\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Class Distribution}
+
+The dataset exhibits significant class imbalance, which is realistic -- genuine fraud cases constitute only a small fraction of total UPI transactions. Approximately 3.2\% of records are labeled as fraudulent, resulting in roughly 3,200 fraud cases among 100,000 total transactions. This imbalance is handled during training through the \texttt{scale\_pos\_weight} mechanism described in Section~\ref{sec:imbalance}.
+
+\section{Feature Engineering}
+
+\subsection{Data Cleaning and Timestamp Parsing}
+
+The first step in processing is straightforward but important. The \texttt{timestamp} field is parsed from string format into proper Python datetime objects using \texttt{pd.to\_datetime()}, and any records with invalid timestamps (null or unparseable values) are dropped. Records are then sorted by \texttt{sender\_id} and \texttt{timestamp}, which is essential for the correct computation of time-window-based features in subsequent steps.
+
+\subsection{Temporal Features}
+
+Several features are derived directly from the transaction timestamp:
+
+\begin{itemize}
+    \item \texttt{hour}: The hour of day (0--23) when the transaction occurred. Fraudulent transactions show a statistically higher frequency in late-night hours.
+    \item \texttt{day\_of\_week}: The day of the week (0 = Monday, 6 = Sunday).
+    \item \texttt{is\_weekend}: A binary flag (1 if Saturday or Sunday, else 0). Weekends have different transaction patterns, particularly for P2M transactions.
+    \item \texttt{month}: The calendar month. Spending patterns vary by month, with salary disbursement months showing different profiles.
+    \item \texttt{is\_night}: A binary flag that is set to 1 for transactions occurring between midnight and 5 AM. This window corresponds to hours when transaction volume is naturally low and human oversight is minimal, making it a favorable window for automated fraudulent activity.
+    \item \texttt{is\_salary\_week}: A binary flag that is set to 1 if the transaction falls within the first seven days of the calendar month. The beginning of the month is when salary disbursements occur in India, making it a period of elevated transaction activity and, correspondingly, elevated fraud risk.
+\end{itemize}
+
+\subsection{Transaction Velocity Feature}
+
+\label{sec:velocity}
+
+Transaction velocity captures how frequently a particular sender is making transactions in a short time window. A sender who makes fifteen transactions in one hour is behaving very differently from one who makes one transaction per week, and this difference is a meaningful fraud signal.
+
+The velocity feature is computed using pandas groupby with a rolling time window:
+
+\begin{lstlisting}[caption={Transaction velocity computation using rolling window}, label={lst:velocity}]
+df = df.set_index("timestamp")
+
+df["txn_velocity_1h"] = (
+    df.groupby("sender_id")["amount"]
+    .rolling("1h")
+    .count()
+    .reset_index(level=0, drop=True)
+)
+
+df = df.reset_index()
+df["txn_velocity_1h"] = df["txn_velocity_1h"].fillna(1)
+\end{lstlisting}
+
+The \texttt{rolling("1h")} call computes a time-based window of one hour, counting how many transactions the same sender made in the hour preceding each transaction. This is set indexed on the timestamp column (which is a prerequisite for pandas time-based rolling operations). Missing values, which occur for the first transaction of each sender, are filled with 1 (meaning ``at least one transaction seen'').
+
+\subsection{Behavioral Profiling Features}
+
+For each sender, the following aggregate statistics are computed across all their transactions in the dataset:
+
+\begin{itemize}
+    \item \texttt{sender\_mean\_amt}: The average transaction amount for this sender. This establishes a personal baseline.
+    \item \texttt{sender\_std\_amt}: The standard deviation of transaction amounts for this sender. A high standard deviation means the sender's transactions are highly variable; a low standard deviation means they are consistent.
+    \item \texttt{sender\_txn\_count}: Total number of transactions from this sender in the dataset.
+    \item \texttt{unique\_receivers}: Number of distinct receivers this sender has transacted with. A sender who sends money to dozens of different accounts (rather than a small set of regular payees) exhibits a pattern consistent with money mule activity.
+\end{itemize}
+
+\subsection{Z-Score Anomaly Detection}
+
+The Z-score of each transaction's amount relative to the sender's personal baseline provides a normalized measure of how unusual that particular transaction is:
+
+\begin{equation}
+Z_{i} = \frac{a_i - \mu_s}{\sigma_s + \epsilon}
+\end{equation}
+
+where $a_i$ is the amount of transaction $i$, $\mu_s$ and $\sigma_s$ are the mean and standard deviation of all transactions from the same sender $s$, and $\epsilon = 10^{-5}$ is a small constant added to prevent division by zero for senders with a single transaction.
+
+A transaction with $|Z_i| > 2$ represents an amount more than two standard deviations away from that sender's typical behavior, which is a meaningful anomaly signal. A transaction with $|Z_i| > 3$ is even more unusual and warrants strong scrutiny.
+
+\begin{lstlisting}[caption={Z-score anomaly feature computation}, label={lst:zscore}]
+df["amount_zscore"] = (
+    (df["amount"] - df["sender_mean_amt"]) /
+    (df["sender_std_amt"] + 1e-5)
+)
+\end{lstlisting}
+
+\subsection{Graph Features}
+
+\label{sec:graph}
+
+This is the most distinctive part of the feature engineering pipeline. The entire transaction dataset is used to construct a \textbf{directed graph} where:
+\begin{itemize}
+    \item Each node represents a unique UPI account ID (either a sender or receiver).
+    \item Each directed edge represents a transaction, pointing from sender to receiver.
+\end{itemize}
+
+The graph is constructed using NetworkX:
+
+\begin{lstlisting}[caption={Directed transaction graph construction}, label={lst:graph}]
+import networkx as nx
+
+G = nx.from_pandas_edgelist(
+    df,
+    source="sender_id",
+    target="receiver_id",
+    create_using=nx.DiGraph()
+)
+
+pagerank = nx.pagerank(G)
+degree = nx.degree_centrality(G)
+
+df["sender_pagerank"] = df["sender_id"].map(pagerank)
+df["sender_degree"] = df["sender_id"].map(degree)
+\end{lstlisting}
+
+Two graph centrality metrics are computed:
+
+\paragraph{PageRank} PageRank, originally developed for ranking web pages, assigns a score to each node based on the quantity and quality of incoming edges. In a transaction graph, a node with high PageRank is one that receives transactions from many other nodes that themselves have high PageRank -- a pattern consistent with a central aggregator or money mule account. The algorithm is defined recursively as:
+
+\begin{equation}
+PR(u) = \frac{1-d}{N} + d \sum_{v \in B_u} \frac{PR(v)}{L(v)}
+\end{equation}
+
+where $d$ is the damping factor (typically 0.85), $N$ is the total number of nodes, $B_u$ is the set of nodes with edges pointing to $u$, and $L(v)$ is the out-degree of node $v$.
+
+\paragraph{Degree Centrality} Degree centrality is the fraction of all nodes that a given node is directly connected to. For a directed graph, this captures both in-degree (how many unique senders paid this account) and out-degree (how many unique receivers this account paid). A sender with very high degree centrality is transacting with an unusually large and diverse set of counterparties, which is often a signal of coordinated fraud or mule activity.
+
+\subsection{Cross-State and Cross-Bank Flags}
+
+Two simple binary features capture geographic and institutional risk signals:
+
+\begin{itemize}
+    \item \texttt{cross\_state}: Set to 1 if the sender and receiver are registered in different Indian states. Fraudsters often receive funds in a different state from where they find victims, making cross-state transactions a mild risk indicator.
+    \item \texttt{inter\_bank}: Set to 1 if the sender and receiver use different banks. Combined with other features, inter-bank transfers can indicate slightly elevated risk.
+\end{itemize}
+
+\subsection{Categorical Encoding}
+
+All categorical features are converted to numeric form using one-hot encoding via pandas \texttt{get\_dummies()}. This creates binary indicator columns for each category value (e.g., \texttt{transaction\_type\_P2M}, \texttt{device\_type\_iOS}, \texttt{network\_type\_WiFi}). The \texttt{drop\_first=True} option is used to avoid multicollinearity by dropping one category from each feature group.
+
+\section{Data Splitting Strategy}
+
+\label{sec:split}
+
+The data is split into three parts using a two-stage stratified split:
+
+\begin{enumerate}
+    \item 80\% of the data is allocated to a combined training+validation pool; 20\% is held out as the final test set.
+    \item The training+validation pool is further split into 80\% training (64\% of total) and 20\% validation (16\% of total).
+\end{enumerate}
+
+Stratified splitting ensures that the class ratio (approximately 3.2\% fraud) is preserved in each split. This is important because with small minority classes, a random split might produce a test set with an unrepresentative fraud rate. The final proportions are approximately:
+
+\begin{itemize}
+    \item Training: 64,000 records (~2,048 fraud cases)
+    \item Validation: 16,000 records (~512 fraud cases)
+    \item Test: 20,000 records (~640 fraud cases)
+\end{itemize}
+
+No transaction from the training set appears in the validation or test sets (no leakage). The graph features, which are computed over the entire dataset before splitting, are the only features where information technically flows from test records into training features. This is a known limitation in graph-based fraud detection; in a true production setting, the graph would be built on historical data only, not future transactions.
+
+\section{Model Selection and Configuration}
+
+\subsection{Choice of XGBoost}
+
+We evaluated three candidate algorithms: Logistic Regression, Random Forest, and XGBoost. After initial comparison experiments on a held-out validation set, XGBoost was selected based on consistently superior performance on PR-AUC, which is the metric most relevant for imbalanced classification problems (unlike ROC-AUC, PR-AUC is sensitive to the minority class performance and does not inflate with the abundance of true negatives).
+
+\subsection{Handling Class Imbalance}
+\label{sec:imbalance}
+
+Rather than using SMOTE or other oversampling methods, class imbalance is handled through XGBoost's \texttt{scale\_pos\_weight} parameter. This parameter is set to the ratio of negative to positive training examples:
+
+\begin{equation}
+\texttt{scale\_pos\_weight} = \frac{|\text{negative samples}|}{|\text{positive samples}|}
+\end{equation}
+
+If there are approximately 61,952 negative samples and 2,048 positive samples in the training set, this ratio is approximately 30.25. Setting this weight tells XGBoost to give 30 times more importance to correctly classifying fraud examples than legitimate ones during gradient updates.
+
+\subsection{XGBoost Hyperparameters}
+
+The model is configured with the following hyperparameter values, arrived at through a combination of domain knowledge and experimentation on the validation set:
+
+\begin{table}[H]
+\centering
+\caption{XGBoost Model Hyperparameters}
+\label{tab:xgb_params}
+\begin{tabular}{|l|l|p{5.5cm}|}
+\hline
+\textbf{Parameter} & \textbf{Value} & \textbf{Reasoning}\\
+\hline
+\texttt{n\_estimators} & 800 & Large ensemble for stable predictions on imbalanced data\\
+\hline
+\texttt{max\_depth} & 10 & Allows complex feature interactions to be captured\\
+\hline
+\texttt{learning\_rate} & 0.02 & Small rate to prevent overfitting; compensated by more trees\\
+\hline
+\texttt{min\_child\_weight} & 5 & Prevents trees from splitting on very few fraud samples\\
+\hline
+\texttt{gamma} & 1 & Regularization on tree growth\\
+\hline
+\texttt{subsample} & 0.9 & Trains each tree on 90\% of data -- adds variance reduction\\
+\hline
+\texttt{colsample\_bytree} & 0.9 & Uses 90\% of features per tree -- reduces correlation between trees\\
+\hline
+\texttt{reg\_alpha} & 0.5 & L1 regularization -- encourages sparsity\\
+\hline
+\texttt{reg\_lambda} & 1.0 & L2 regularization -- prevents large weights\\
+\hline
+\texttt{scale\_pos\_weight} & $\approx$30.25 & Computed from training data class ratio\\
+\hline
+\texttt{eval\_metric} & aucpr & Optimizes toward PR-AUC during boosting rounds\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Cost-Sensitive Threshold Optimization}
+
+The standard XGBoost output is a probability estimate for each transaction. To convert this into a binary prediction (fraud or safe), a decision threshold must be chosen. The default threshold of 0.5 is rarely appropriate for imbalanced fraud detection problems.
+
+Instead, we scan all threshold values from 0.01 to 0.50 in steps of 0.01, and for each threshold we compute the confusion matrix on the validation set and calculate the resulting financial loss:
+
+\begin{equation}
+L(t) = C_{FN} \times FN(t) + C_{FP} \times FP(t)
+\end{equation}
+
+The cost parameters used are $C_{FN} = \text{Rs.}\ 5000$ per missed fraud and $C_{FP} = \text{Rs.}\ 200$ per false alarm. These values reflect the asymmetry in real-world costs: a missed fraud case typically results in a complete loss of the transaction amount (we use 5000 as a representative average), while a blocked legitimate transaction costs customer service time, potential dispute processing, and trust degradation.
+
+The threshold that minimizes $L(t)$ on the validation set is selected as the final decision threshold and saved to disk alongside the trained model. This threshold is then applied to the test set for the final evaluation.
+
+\section{Evaluation Metrics}
+
+Model performance is assessed using the following metrics:
+
+\begin{itemize}
+    \item \textbf{ROC-AUC}: Area under the Receiver Operating Characteristic curve. Measures the model's ability to discriminate between fraud and legitimate transactions across all possible thresholds.
+    \item \textbf{PR-AUC}: Area under the Precision-Recall curve. More informative than ROC-AUC for imbalanced problems; measures how well the model performs specifically on the minority class.
+    \item \textbf{Precision}: Of all transactions flagged as fraud, what fraction actually were fraud.
+    \item \textbf{Recall (Sensitivity)}: Of all actual fraud cases, what fraction were correctly flagged.
+    \item \textbf{F1-Score}: Harmonic mean of precision and recall.
+    \item \textbf{Confusion Matrix}: Exact counts of TP, TN, FP, FN.
+    \item \textbf{Financial Loss}: Total estimated financial cost of prediction errors under the cost model.
+\end{itemize}

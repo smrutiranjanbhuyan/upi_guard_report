@@ -1,0 +1,57 @@
+\chapter{Introduction}
+
+\section{Background and Motivation}
+
+If you live in India and have bought something recently -- even a cup of tea from a roadside stall -- there is a good chance you paid by scanning a QR code. That small, everyday act runs on the Unified Payments Interface, better known as UPI. In less than a decade, UPI has quietly but completely reshaped how ordinary Indians handle money. Farmers now receive payments for their produce digitally. Students split restaurant bills in seconds. Small business owners who once dealt exclusively in cash now accept payments from anywhere in the country without owning a single card terminal.
+
+The numbers behind this transformation are staggering. By 2024, UPI was processing over 13 billion transactions per month, connecting more than 400 million users across thousands of banks and payment applications. It is without question one of the most successful financial technology stories anywhere in the world, and it happened at a pace that surprised even the people who built it.
+
+But wherever large sums of money move quickly, fraud follows. And UPI has not been spared. Across India, people are losing money to increasingly clever scams -- a WhatsApp message claiming that a package could not be delivered and asking for a small fee to reroute it, a phone call from someone pretending to be a bank official asking the victim to share an OTP to ``verify'' their account, a QR code that has been tampered with to send money to the wrong person. The victims are often ordinary people who made one trusting mistake, and by the time they realize what happened, the money is gone. Recovery is difficult, legal processes are slow, and the emotional damage can be lasting.
+
+According to data from the National Payments Corporation of India (NPCI) and various cybercrime reporting portals, UPI-related fraud complaints have grown year over year alongside the platform's expanding user base. In 2023, the Indian government's cybercrime portal received hundreds of thousands of fraud complaints, with a significant portion related to digital payment platforms. The problem is not simply that fraud exists -- fraud has existed in every payment system ever built. The problem is that the tools designed to catch it have not kept pace.
+
+Most fraud detection systems currently in use rely on \textit{rule-based logic}: block transactions above a certain amount, flag accounts that make too many transfers in a short window, reject payments from locations that have never been seen before. These rules made sense when fraud looked predictable and repeated itself. Today, it does not. Fraudsters study these systems and find ways around them. They split large transfers into many small ones. They wait for the quiet hours when detection systems are less active. They create new accounts to avoid historical flags. The rules are always reacting to yesterday's patterns, and fraud has already moved on.
+
+What this situation calls for is something fundamentally different -- a detection system that does not wait to be told what fraud looks like, but instead \textit{learns} it from the data itself. A system that grows smarter as fraud evolves, that can catch patterns a human analyst would never notice, and that scales to handle billions of transactions without requiring constant manual updates. That is the motivation behind this project.
+
+\section{Problem Definition}
+
+At its core, UPI fraud detection is a binary classification problem. For each transaction passing through a system, the detector must answer a single question: is this transaction legitimate, or is something wrong with it? The model examines available information about the transaction and outputs one of two labels -- \texttt{safe} or \texttt{fraud}.
+
+Getting to a reliable answer is far harder than the question itself suggests, for several interconnected reasons.
+
+\begin{itemize}
+    \item \textbf{Class imbalance:} For every fraudulent UPI transaction, there are thousands of perfectly normal ones. In a typical fraud dataset, fraud cases make up well under 1\% of all records. This creates a dangerous trap for machine learning models: a model that simply labels every transaction as legitimate would be technically correct over 99\% of the time, yet completely useless for the actual task. Building a model that genuinely learns what fraud looks like, rather than defaulting to the easy answer, requires deliberate effort and careful technique.
+
+    \item \textbf{Concept drift:} Fraud patterns evolve. What looked like fraud six months ago may look different today, and what works as a detection signal now may become useless as fraudsters adapt. A model trained once and left alone will gradually become less effective, not because anything broke, but because the world it was trained on has changed.
+
+    \item \textbf{Asymmetric error costs:} There are two ways to be wrong in fraud detection, and they are not equally bad. Missing a fraud case means a victim loses money -- sometimes their life savings. Incorrectly flagging a legitimate transaction blocks someone from accessing their own funds, damages trust in the system, and can cause genuine hardship. A well-designed fraud detector must think carefully about both types of error, not just chase the highest accuracy number.
+
+    \item \textbf{Speed constraints:} UPI transactions complete in under a second. Fraud detection must happen inline, during the transaction itself, fast enough that the user does not notice the check is taking place. This rules out any approach that requires significant real-time computation.
+
+    \item \textbf{Limited ground truth:} Many fraud cases go unreported or are only discovered long after the fact. The labels in any fraud dataset are necessarily incomplete -- some transactions labeled as legitimate may actually be fraud that was never caught.
+\end{itemize}
+
+\section{Project Objectives}
+
+Based on the problem analysis above, this project was designed around the following objectives:
+
+\begin{enumerate}
+    \item Design a complete, end-to-end fraud detection pipeline that handles raw UPI transaction data and produces actionable predictions.
+    \item Engineer a rich set of features that goes beyond the raw transaction fields -- including temporal patterns, behavioural profiles, velocity signals, and graph-based network features.
+    \item Train and evaluate an XGBoost classifier that handles class imbalance natively through appropriate weighting rather than oversampling.
+    \item Implement a cost-sensitive threshold optimization procedure that selects the decision boundary based on real-world financial cost rather than standard classification metrics.
+    \item Deploy the trained model as a production-ready REST API using FastAPI.
+    \item Build an interactive dashboard using Streamlit that allows analysts to explore transaction risk in real time.
+    \item Validate the system against standard performance metrics (ROC-AUC, PR-AUC, precision, recall, F1-score) and demonstrate that the graph-enhanced approach outperforms baseline methods.
+\end{enumerate}
+
+\section{Scope of the Project}
+
+This project focuses specifically on the detection of fraudulent UPI transactions using machine learning. It does not address fraud prevention (stopping fraudulent accounts from being created), fraud investigation (tracing money flows after fraud has occurred), or legal/regulatory aspects of financial fraud.
+
+The dataset used is sourced from Kaggle and contains 100,000 simulated-but-realistic UPI transaction records designed to reflect patterns found in actual UPI fraud cases. The system is designed and tested in a batch training and real-time inference context -- it is not a streaming system, though the API layer could support streaming input with appropriate infrastructure.
+
+\section{Organization of the Report}
+
+The rest of this report is organized as follows. Chapter 2 reviews the existing literature on fraud detection, covering the progression from rule-based systems to machine learning approaches and the specific techniques that have been applied to UPI fraud. Chapter 3 describes the methodology, including the dataset, feature engineering process, model selection, and threshold optimization strategy. Chapter 4 covers the implementation in detail, with code walkthroughs of each major module. Chapter 5 presents the system architecture and module design. Chapter 6 discusses the testing approach and performance results. Chapter 7 describes the API and dashboard deployment. Chapter 8 presents conclusions and future work directions.

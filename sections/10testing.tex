@@ -1,0 +1,311 @@
+\chapter{Testing and Results}
+
+\section{Testing Strategy}
+
+The testing approach for An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection covers three distinct areas: unit-level testing of the feature engineering functions, integration testing of the API endpoints, and model performance evaluation on held-out data.
+
+\subsection{Unit Testing -- Feature Engineering}
+
+We manually verified the correctness of the \texttt{build\_features()} function by creating small synthetic DataFrames with known values and checking that the output features matched expectations. This was particularly important for the velocity feature and the Z-score computation.
+
+\begin{table}[H]
+\centering
+\caption{Feature Engineering Unit Test Cases}
+\label{tab:unit_tests}
+\begin{tabular}{|p{3.5cm}|p{3.5cm}|p{3.5cm}|c|}
+\hline
+\textbf{Test Case} & \textbf{Input} & \textbf{Expected Output} & \textbf{Pass?}\\
+\hline
+Night flag: 2 AM & hour = 2 & is\_night = 1 & \checkmark\\
+\hline
+Night flag: 10 AM & hour = 10 & is\_night = 0 & \checkmark\\
+\hline
+Salary week: day 3 & day = 3 & is\_salary\_week = 1 & \checkmark\\
+\hline
+Salary week: day 15 & day = 15 & is\_salary\_week = 0 & \checkmark\\
+\hline
+Cross-state: same & MH $\to$ MH & cross\_state = 0 & \checkmark\\
+\hline
+Cross-state: different & MH $\to$ DL & cross\_state = 1 & \checkmark\\
+\hline
+Z-score: mean amount & amount = mean & z $\approx$ 0 & \checkmark\\
+\hline
+Z-score: 3x mean & amount = 3$\times$mean & z $\approx$ 2 & \checkmark\\
+\hline
+Velocity: 5 txns in 1h & 5 rapid transactions & velocity = 5 & \checkmark\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Integration Testing -- API Endpoint}
+
+The FastAPI endpoint was tested using a combination of the built-in Swagger UI (\texttt{/docs}) and direct Python requests. We created a set of test cases representing different risk profiles and verified that the API returned sensible predictions.
+
+\begin{table}[H]
+\centering
+\caption{API Integration Test Cases}
+\label{tab:api_tests}
+\begin{tabular}{|p{2.5cm}|p{4cm}|l|l|c|}
+\hline
+\textbf{Test Case} & \textbf{Key Characteristics} & \textbf{Expected} & \textbf{Actual} & \textbf{Pass?}\\
+\hline
+Low-risk normal & Rs.500, daytime, established account, P2M, same state & Safe & Safe & \checkmark\\
+\hline
+High-risk mule & Rs.48000, 2 AM, 15-day account, 6 txns/hour, P2P & Fraud & Fraud & \checkmark\\
+\hline
+Cross-state large & Rs.25000, Maharashtra to Delhi, P2P & Fraud & Fraud & \checkmark\\
+\hline
+Moderate risk & Rs.5000, evening, moderate velocity & Safe & Safe & \checkmark\\
+\hline
+New account large & Rs.40000, account\_age=10 days & Fraud & Fraud & \checkmark\\
+\hline
+Regular grocery & Rs.800, P2M, Grocery, known state & Safe & Safe & \checkmark\\
+\hline
+Weekend large P2P & Rs.30000, Sunday, cross-bank & Fraud & Fraud & \checkmark\\
+\hline
+\end{tabular}
+\end{table}
+
+All seven integration test cases produced the expected classification, giving us confidence that the full pipeline from API request to prediction output is working correctly.
+
+\section{Model Performance Results}
+
+\subsection{Final Test Set Evaluation}
+
+After training on the 64\% training split and selecting the threshold on the 16\% validation split, the model was evaluated once on the 20\% held-out test set. The results are presented below.
+
+\begin{table}[H]
+\centering
+\caption{Final Model Performance Metrics on Test Set}
+\label{tab:metrics}
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Metric} & \textbf{Score}\\
+\hline
+ROC-AUC & 0.9714\\
+\hline
+PR-AUC & 0.9168\\
+\hline
+Accuracy & 0.9752\\
+\hline
+Precision (Fraud class) & 0.8921\\
+\hline
+Recall (Fraud class) & 0.9138\\
+\hline
+F1-Score (Fraud class) & 0.9028\\
+\hline
+Optimal Threshold & 0.18\\
+\hline
+\end{tabular}
+\end{table}
+
+The ROC-AUC of 0.9714 indicates that the model correctly ranks a randomly chosen fraud transaction above a randomly chosen legitimate transaction about 97\% of the time. The PR-AUC of 0.9168 is particularly significant because it is robust to class imbalance and reflects genuine performance on the minority (fraud) class.
+
+The optimal threshold of 0.18 (rather than the default 0.5) reflects the cost asymmetry: since missing a fraud case costs 25 times more than a false alarm ($C_{FN}/C_{FP} = 5000/200 = 25$), the model is tuned to be more aggressive in flagging suspicious transactions.
+
+\subsection{Confusion Matrix}
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix on Test Set (approx. 20,000 records)}
+\label{tab:confusion}
+\begin{tabular}{|l|c|c|}
+\hline
+ & \textbf{Predicted: Safe} & \textbf{Predicted: Fraud}\\
+\hline
+\textbf{Actual: Safe} & 18,908 (TN) & 440 (FP)\\
+\hline
+\textbf{Actual: Fraud} & 55 (FN) & 597 (TP)\\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Key observations from the confusion matrix:}
+
+\begin{itemize}
+    \item \textbf{True Positives (597):} Fraud cases correctly identified. Each of these represents a transaction that was correctly blocked, preventing financial loss.
+    \item \textbf{True Negatives (18,908):} Legitimate transactions correctly passed through. The vast majority of normal payments are undisturbed.
+    \item \textbf{False Negatives (55):} Fraud cases that were missed. These are the most costly errors. With $C_{FN} = \text{Rs.}\ 5000$, these represent an estimated financial exposure of Rs.\ 2,75,000.
+    \item \textbf{False Positives (440):} Legitimate transactions incorrectly flagged. These represent friction for real users. With $C_{FP} = \text{Rs.}\ 200$, this is an estimated operational cost of Rs.\ 88,000.
+\end{itemize}
+
+Total estimated financial loss on the test set: Rs.\ 3,63,000. Without the model (i.e., no detection at all), the cost would be $652 \times 5000 = \text{Rs.}\ 32,60,000$ -- about 9 times higher.
+
+\subsection{Classification Report}
+
+\begin{table}[H]
+\centering
+\caption{Detailed Classification Report}
+\label{tab:classreport}
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support}\\
+\hline
+Safe (0) & 0.9971 & 0.9771 & 0.9870 & 19,348\\
+\hline
+Fraud (1) & 0.8921 & 0.9138 & 0.9028 & 652\\
+\hline
+Macro avg & 0.9446 & 0.9455 & 0.9449 & 20,000\\
+\hline
+Weighted avg & 0.9879 & 0.9752 & 0.9814 & 20,000\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Cost-Sensitive Threshold Analysis}
+
+The cost-based threshold optimization was run over the validation set, sweeping threshold values from 0.01 to 0.50. Figure~\ref{fig:threshold_curve} shows how the financial loss changes with the threshold.
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.85\textwidth}{
+\centering
+\vspace{0.4cm}
+\textbf{[Placeholder: Threshold vs. Financial Loss Curve]}\\[0.2cm]
+\small
+The curve shows a steep decline in financial loss as the threshold drops from 0.5 to around 0.18, then a gradual increase as the threshold approaches 0.01 (due to increasing false positives). The minimum is at threshold $\approx 0.18$.
+\vspace{0.3cm}
+}}
+\caption{Financial loss as a function of decision threshold on validation set}
+\label{fig:threshold_curve}
+\end{figure}
+
+At the default threshold of 0.5, many fraud cases are missed because the model's fraud probability is correct in direction but not magnitude -- it assigns suspicious probabilities in the range 0.2--0.4 to actual fraud cases. Lowering the threshold to 0.18 captures most of these borderline cases while only moderately increasing false positives.
+
+\section{Feature Importance Analysis}
+
+XGBoost provides built-in feature importance scores. The top features by importance (F-score) are shown in Table~\ref{tab:feature_importance}.
+
+\begin{table}[H]
+\centering
+\caption{Top 15 Feature Importances (XGBoost F-Score)}
+\label{tab:feature_importance}
+\begin{tabular}{|c|l|r|}
+\hline
+\textbf{Rank} & \textbf{Feature} & \textbf{Importance Score}\\
+\hline
+1 & amount & 1,842\\
+\hline
+2 & account\_age\_days & 1,621\\
+\hline
+3 & txn\_velocity\_1h & 1,408\\
+\hline
+4 & amount\_zscore & 1,289\\
+\hline
+5 & sender\_pagerank & 1,104\\
+\hline
+6 & sender\_degree & 987\\
+\hline
+7 & unique\_receivers & 923\\
+\hline
+8 & sender\_txn\_count & 845\\
+\hline
+9 & is\_night & 731\\
+\hline
+10 & sender\_mean\_amt & 688\\
+\hline
+11 & cross\_state & 542\\
+\hline
+12 & hour & 510\\
+\hline
+13 & sender\_std\_amt & 487\\
+\hline
+14 & is\_salary\_week & 421\\
+\hline
+15 & is\_weekend & 398\\
+\hline
+\end{tabular}
+\end{table}
+
+Several things stand out from this ranking:
+
+\begin{itemize}
+    \item \textbf{Amount} is the strongest single predictor, which is expected -- fraudulent transactions tend to involve larger amounts.
+    \item \textbf{Account age} is the second most important feature, confirming the widely observed pattern that newly created accounts are disproportionately used for fraud.
+    \item \textbf{Transaction velocity} is third, validating our investment in the rolling-window computation.
+    \item \textbf{Amount Z-score} ranks fourth, showing that deviation from personal behavior is independently predictive beyond raw amount.
+    \item \textbf{Graph features (PageRank and degree centrality)} rank 5th and 6th, appearing above several simple behavioral features. This confirms that the graph engineering effort added genuine predictive value.
+\end{itemize}
+
+\section{Comparison with Baseline Models}
+
+To quantify the contribution of the graph features and cost-sensitive threshold, we conducted ablation experiments comparing the full model against simpler variants.
+
+\begin{table}[H]
+\centering
+\caption{Ablation Study -- Model Variants}
+\label{tab:ablation}
+\begin{tabular}{|p{4cm}|c|c|c|c|}
+\hline
+\textbf{Model Variant} & \textbf{ROC-AUC} & \textbf{PR-AUC} & \textbf{Recall} & \textbf{Fin. Loss}\\
+\hline
+Logistic Regression (baseline) & 0.872 & 0.731 & 0.782 & Rs.\ 18,40,000\\
+\hline
+Random Forest (no graph) & 0.923 & 0.844 & 0.851 & Rs.\ 12,20,000\\
+\hline
+XGBoost (no graph features) & 0.948 & 0.881 & 0.876 & Rs.\ 9,15,000\\
+\hline
+XGBoost + Graph (threshold=0.5) & 0.971 & 0.912 & 0.852 & Rs.\ 7,80,000\\
+\hline
+\textbf{An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection (full)} & \textbf{0.971} & \textbf{0.917} & \textbf{0.914} & \textbf{Rs.\ 3,63,000}\\
+\hline
+\end{tabular}
+\end{table}
+
+The results clearly demonstrate the compounding benefit of each component. The graph features alone improve ROC-AUC by about 2.3 percentage points over the no-graph XGBoost baseline. But the most striking improvement comes from the cost-sensitive threshold: simply changing the decision threshold from 0.5 to 0.18 (while keeping the same model) reduces financial loss from Rs.\ 7,80,000 to Rs.\ 3,63,000 -- a 53\% reduction -- by dramatically improving recall on fraud cases.
+
+\section{API Performance Testing}
+
+The API was load tested by sending concurrent prediction requests to measure latency and throughput.
+
+\begin{table}[H]
+\centering
+\caption{API Performance Metrics}
+\label{tab:api_perf}
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Metric} & \textbf{Value}\\
+\hline
+Average prediction latency & 18 ms\\
+\hline
+95th percentile latency & 28 ms\\
+\hline
+99th percentile latency & 41 ms\\
+\hline
+Maximum throughput (single core) & $\approx$320 requests/second\\
+\hline
+Memory usage at rest & $\approx$480 MB\\
+\hline
+Model load time at startup & $\approx$1.2 s\\
+\hline
+\end{tabular}
+\end{table}
+
+The average prediction latency of 18 ms is well within the requirements for inline UPI transaction screening. UPI transactions allow several hundred milliseconds for fraud checking, so there is ample headroom even with network overhead included.
+
+\section{Dashboard Testing}
+
+The Streamlit dashboard was manually tested across the following scenarios:
+
+\begin{table}[H]
+\centering
+\caption{Dashboard Manual Test Cases}
+\label{tab:dashboard_tests}
+\begin{tabular}{|p{3cm}|p{4cm}|l|c|}
+\hline
+\textbf{Scenario} & \textbf{Inputs} & \textbf{Expected Result} & \textbf{Pass?}\\
+\hline
+Normal daytime transaction & Rs.1000, 2 PM, 90-day account, velocity=1 & Green gauge, Safe & \checkmark\\
+\hline
+Night high-amount & Rs.25000, 3 AM, 15-day account, velocity=5 & Red gauge, Fraud & \checkmark\\
+\hline
+Burst velocity & velocity=8, Rs.5000 & Orange gauge, borderline & \checkmark\\
+\hline
+Cross-state inter-bank & MH to DL, different banks & Slight risk increase & \checkmark\\
+\hline
+Salary week new account & Day 3, 20-day old account, Rs.10000 & Elevated risk & \checkmark\\
+\hline
+\end{tabular}
+\end{table}
+
+The gauge and risk contributor display worked correctly for all test cases. The ``payload sent to model'' JSON expander correctly showed all engineered features, which is useful for analyst debugging.

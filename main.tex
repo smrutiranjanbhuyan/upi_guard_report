@@ -1,0 +1,85 @@
+\documentclass[12pt,a4paper]{report}
+
+% -------------------- SETUP -------------------- %
+\input{file-setup}
+
+\begin{document}
+
+% -------------------- FRONT MATTER -------------------- %
+\pagenumbering{roman}
+\input{front}
+
+% -------------------- CERTIFICATE -------------------- %
+\clearpage
+\input{sections/1certificate}
+
+% -------------------- DECLARATION -------------------- %
+\clearpage
+\input{sections/2declaration}
+
+% -------------------- ACKNOWLEDGEMENT -------------------- %
+\clearpage
+\input{sections/3acknowledgement}
+
+% -------------------- ABSTRACT -------------------- %
+\clearpage
+\input{sections/4abstract}
+
+% -------------------- TABLE OF CONTENTS -------------------- %
+\clearpage
+\renewcommand{\contentsname}{Table of Contents}
+\tableofcontents
+\clearpage
+
+% -------------------- LIST OF FIGURES -------------------- %
+\listoffigures
+\clearpage
+
+% -------------------- LIST OF TABLES -------------------- %
+\listoftables
+\clearpage
+
+% -------------------- MAIN CONTENT -------------------- %
+\pagenumbering{arabic}
+
+% Setup fancy headers for main content
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\leftmark}
+\fancyhead[R]{\small UPI-Guard++}
+\fancyfoot[C]{\thepage}
+
+\input{sections/5introduction}
+\clearpage
+
+\input{sections/6literature}
+\clearpage
+
+\input{sections/7methodology}
+\clearpage
+
+\input{sections/8architecture}
+\clearpage
+
+\input{sections/9implementation}
+\clearpage
+
+\input{sections/10testing}
+\clearpage
+
+\input{sections/11technologies}
+\clearpage
+
+\input{sections/12conclusion}
+\clearpage
+
+% -------------------- REFERENCES -------------------- %
+\clearpage
+\input{sections/13references}
+
+% -------------------- APPENDICES -------------------- %
+\clearpage
+\appendix
+\input{sections/14appendix}
+
+\end{document}

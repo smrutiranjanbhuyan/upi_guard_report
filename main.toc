@@ -1,0 +1,124 @@
+\contentsline {chapter}{Certificate}{i}{chapter*.1}%
+\contentsline {chapter}{Declaration}{iii}{chapter*.2}%
+\contentsline {chapter}{Acknowledgement}{iv}{chapter*.3}%
+\contentsline {chapter}{Abstract}{v}{chapter*.4}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Background and Motivation}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Problem Definition}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Project Objectives}{3}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Scope of the Project}{4}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Organization of the Report}{4}{section.1.5}%
+\contentsline {chapter}{\numberline {2}Literature Review}{5}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Introduction}{5}{section.2.1}%
+\contentsline {section}{\numberline {2.2}The Rule-Based Era}{5}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Machine Learning Approaches to Fraud Detection}{6}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Logistic Regression}{6}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Random Forest}{6}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Gradient Boosting: XGBoost and LightGBM}{7}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Neural Networks and Deep Learning}{7}{subsection.2.3.4}%
+\contentsline {section}{\numberline {2.4}Handling Class Imbalance}{7}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Graph-Based Fraud Detection}{8}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Cost-Sensitive Learning}{8}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Deployment Architectures}{9}{section.2.7}%
+\contentsline {section}{\numberline {2.8}Research Gaps and Our Contribution}{10}{section.2.8}%
+\contentsline {chapter}{\numberline {3}Methodology}{11}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Overview of the Approach}{11}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Dataset}{12}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Source and Size}{12}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Dataset Fields}{12}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Class Distribution}{13}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}Feature Engineering}{13}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Data Cleaning and Timestamp Parsing}{13}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Temporal Features}{14}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Transaction Velocity Feature}{14}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Behavioral Profiling Features}{15}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.5}Z-Score Anomaly Detection}{15}{subsection.3.3.5}%
+\contentsline {subsection}{\numberline {3.3.6}Graph Features}{16}{subsection.3.3.6}%
+\contentsline {paragraph}{PageRank}{16}{paragraph*.8}%
+\contentsline {paragraph}{Degree Centrality}{17}{paragraph*.9}%
+\contentsline {subsection}{\numberline {3.3.7}Cross-State and Cross-Bank Flags}{17}{subsection.3.3.7}%
+\contentsline {subsection}{\numberline {3.3.8}Categorical Encoding}{17}{subsection.3.3.8}%
+\contentsline {section}{\numberline {3.4}Data Splitting Strategy}{17}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Model Selection and Configuration}{18}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Choice of XGBoost}{18}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Handling Class Imbalance}{18}{subsection.3.5.2}%
+\contentsline {subsection}{\numberline {3.5.3}XGBoost Hyperparameters}{18}{subsection.3.5.3}%
+\contentsline {section}{\numberline {3.6}Cost-Sensitive Threshold Optimization}{19}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Evaluation Metrics}{20}{section.3.7}%
+\contentsline {chapter}{\numberline {4}System Architecture and Module Design}{21}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Overall Architecture}{21}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Project Folder Structure}{22}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Module Descriptions}{23}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}preprocess.py -- Feature Engineering Module}{23}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}train.py -- Model Training Module}{24}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}optimize\_threshold.py -- Threshold Optimization Module}{25}{subsection.4.3.3}%
+\contentsline {subsection}{\numberline {4.3.4}api/main.py -- FastAPI REST API Module}{25}{subsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.3.5}ui/dashboard.py -- Streamlit Dashboard Module}{26}{subsection.4.3.5}%
+\contentsline {section}{\numberline {4.4}Data Flow for a Live Prediction Request}{27}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Model Artifacts and Serialization}{28}{section.4.5}%
+\contentsline {chapter}{\numberline {5}Implementation}{29}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Development Environment}{29}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Installation and Setup}{30}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Cloning the Repository}{30}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Creating the Virtual Environment}{30}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Installing Dependencies}{30}{subsection.5.2.3}%
+\contentsline {section}{\numberline {5.3}Implementation of the Preprocessing Module}{30}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Complete build\_features() Function}{30}{subsection.5.3.1}%
+\contentsline {section}{\numberline {5.4}Implementation of the Training Module}{33}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Data Loading and Feature Building}{33}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Data Splitting}{34}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Class Imbalance Handling and Model Training}{34}{subsection.5.4.3}%
+\contentsline {subsection}{\numberline {5.4.4}Threshold Optimization}{35}{subsection.5.4.4}%
+\contentsline {subsection}{\numberline {5.4.5}Model Persistence}{35}{subsection.5.4.5}%
+\contentsline {section}{\numberline {5.5}Implementation of the FastAPI Endpoint}{36}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Implementation of the Streamlit Dashboard}{36}{section.5.6}%
+\contentsline {subsection}{\numberline {5.6.1}Session State Management}{36}{subsection.5.6.1}%
+\contentsline {subsection}{\numberline {5.6.2}Risk Gauge Visualization}{37}{subsection.5.6.2}%
+\contentsline {section}{\numberline {5.7}Running the System}{37}{section.5.7}%
+\contentsline {subsection}{\numberline {5.7.1}Training the Model}{37}{subsection.5.7.1}%
+\contentsline {subsection}{\numberline {5.7.2}Optimizing the Threshold}{38}{subsection.5.7.2}%
+\contentsline {subsection}{\numberline {5.7.3}Starting the API Server}{38}{subsection.5.7.3}%
+\contentsline {subsection}{\numberline {5.7.4}Starting the Dashboard}{38}{subsection.5.7.4}%
+\contentsline {subsection}{\numberline {5.7.5}Testing the API with a Sample Request}{38}{subsection.5.7.5}%
+\contentsline {chapter}{\numberline {6}Testing and Results}{40}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Testing Strategy}{40}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Unit Testing -- Feature Engineering}{40}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Integration Testing -- API Endpoint}{41}{subsection.6.1.2}%
+\contentsline {section}{\numberline {6.2}Model Performance Results}{41}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Final Test Set Evaluation}{41}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Confusion Matrix}{42}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}Classification Report}{43}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}Cost-Sensitive Threshold Analysis}{43}{subsection.6.2.4}%
+\contentsline {section}{\numberline {6.3}Feature Importance Analysis}{43}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Comparison with Baseline Models}{44}{section.6.4}%
+\contentsline {section}{\numberline {6.5}API Performance Testing}{45}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Dashboard Testing}{46}{section.6.6}%
+\contentsline {chapter}{\numberline {7}Technologies and Tools Used}{47}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Programming Language: Python}{47}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Core Machine Learning Libraries}{47}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}XGBoost}{47}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}scikit-learn}{48}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}pandas and NumPy}{48}{subsection.7.2.3}%
+\contentsline {section}{\numberline {7.3}Graph Analysis: NetworkX}{48}{section.7.3}%
+\contentsline {section}{\numberline {7.4}API Framework: FastAPI}{49}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Uvicorn}{49}{subsection.7.4.1}%
+\contentsline {section}{\numberline {7.5}Dashboard: Streamlit}{49}{section.7.5}%
+\contentsline {section}{\numberline {7.6}Data Visualization: Plotly}{50}{section.7.6}%
+\contentsline {section}{\numberline {7.7}Version Control: Git and GitHub}{50}{section.7.7}%
+\contentsline {section}{\numberline {7.8}Development Tools}{50}{section.7.8}%
+\contentsline {chapter}{\numberline {8}Conclusion and Future Work}{51}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Conclusion}{51}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Limitations}{52}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Future Work}{52}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Graph Neural Networks (GNN)}{53}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Real-Time Streaming Detection}{53}{subsection.8.3.2}%
+\contentsline {subsection}{\numberline {8.3.3}SHAP Explainability}{53}{subsection.8.3.3}%
+\contentsline {subsection}{\numberline {8.3.4}Multi-Algorithm Ensemble}{53}{subsection.8.3.4}%
+\contentsline {subsection}{\numberline {8.3.5}Concept Drift Detection and Adaptive Retraining}{53}{subsection.8.3.5}%
+\contentsline {subsection}{\numberline {8.3.6}Docker Deployment}{54}{subsection.8.3.6}%
+\contentsline {subsection}{\numberline {8.3.7}Feedback Loop Integration}{54}{subsection.8.3.7}%
+\contentsline {section}{\numberline {8.4}Summary}{54}{section.8.4}%
+\contentsline {chapter}{References}{55}{Item.38}%
+\contentsline {chapter}{Appendix A: Complete requirements.txt}{57}{appendix*.28}%
+\contentsline {chapter}{Appendix B: Sample API Request and Response}{58}{appendix*.29}%
+\contentsline {chapter}{Appendix C: Project Repository Structure}{60}{appendix*.30}%

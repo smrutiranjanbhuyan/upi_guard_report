@@ -1,0 +1,126 @@
+\chapter*{Appendix A: Complete requirements.txt}
+\addcontentsline{toc}{chapter}{Appendix A: Complete requirements.txt}
+
+The following Python packages are required to run An Intelligent Hybrid Machine Learning Framework for UPI Fraud Detection. Install them using \texttt{pip install -r requirements.txt} inside a Python 3.10 virtual environment.
+
+\begin{lstlisting}[language=bash, caption={requirements.txt -- Python dependencies}]
+pandas
+numpy
+scikit-learn
+xgboost
+networkx
+imbalanced-learn
+fastapi
+uvicorn
+streamlit
+requests
+shap
+plotly
+\end{lstlisting}
+
+\chapter*{Appendix B: Sample API Request and Response}
+\addcontentsline{toc}{chapter}{Appendix B: Sample API Request and Response}
+
+\section*{B.1 Sample High-Risk Request}
+
+\begin{lstlisting}[language=Python, caption={High-risk transaction API call}]
+POST http://127.0.0.1:8000/predict
+Content-Type: application/json
+
+{
+  "transaction_id": "TXN001",
+  "timestamp": "2024-06-15 02:30:00",
+  "sender_id": "SENDER_001",
+  "receiver_id": "RECEIVER_999",
+  "amount": 48000,
+  "transaction_type": "P2P",
+  "merchant_category": "Retail",
+  "sender_state": "Maharashtra",
+  "receiver_state": "Delhi",
+  "sender_bank": "HDFC",
+  "receiver_bank": "SBI",
+  "device_type": "Android",
+  "network_type": "4G",
+  "account_age_days": 12,
+  "txn_velocity_1h": 7
+}
+\end{lstlisting}
+
+\textbf{Expected Response:}
+
+\begin{lstlisting}[language=Python, caption={API response for high-risk transaction}]
+{
+  "fraud_probability": 0.9214,
+  "decision": "Fraud"
+}
+\end{lstlisting}
+
+\section*{B.2 Sample Low-Risk Request}
+
+\begin{lstlisting}[language=Python, caption={Low-risk transaction API call}]
+POST http://127.0.0.1:8000/predict
+Content-Type: application/json
+
+{
+  "transaction_id": "TXN002",
+  "timestamp": "2024-06-15 10:30:00",
+  "sender_id": "SENDER_002",
+  "receiver_id": "RECEIVER_050",
+  "amount": 450,
+  "transaction_type": "P2M",
+  "merchant_category": "Grocery",
+  "sender_state": "Karnataka",
+  "receiver_state": "Karnataka",
+  "sender_bank": "ICICI",
+  "receiver_bank": "ICICI",
+  "device_type": "iOS",
+  "network_type": "WiFi",
+  "account_age_days": 720,
+  "txn_velocity_1h": 1
+}
+\end{lstlisting}
+
+\textbf{Expected Response:}
+
+\begin{lstlisting}[language=Python, caption={API response for low-risk transaction}]
+{
+  "fraud_probability": 0.0312,
+  "decision": "Safe"
+}
+\end{lstlisting}
+
+\chapter*{Appendix C: Project Repository Structure}
+\addcontentsline{toc}{chapter}{Appendix C: Project Repository Structure}
+
+The complete project repository is publicly available at:
+
+\url{https://github.com/smrutiranjanbhuyan/upi-guard}
+
+\begin{verbatim}
+upi-guard/
+|
+|-- data/
+|   +-- upi_100k_ultra_realistic.csv     (Dataset: 100K records)
+|
+|-- model/                                (Generated after training)
+|   |-- fraud_model.pkl
+|   |-- feature_columns.pkl
+|   +-- threshold.pkl
+|
+|-- src/
+|   |-- preprocess.py                    (Feature engineering)
+|   |-- train.py                         (Model training)
+|   |-- optimize_threshold.py            (Threshold optimization)
+|   |-- explain.py                       (SHAP explainability stub)
+|   +-- upi_fraud_detection_pipeline.ipynb (EDA notebook)
+|
+|-- api/
+|   +-- main.py                          (FastAPI REST endpoint)
+|
+|-- ui/
+|   +-- dashboard.py                     (Streamlit dashboard)
+|
+|-- requirements.txt
+|-- .gitignore
++-- README.md
+\end{verbatim}
