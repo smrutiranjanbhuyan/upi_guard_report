@@ -110,12 +110,12 @@
 \contentsline {section}{\numberline {8.1}Conclusion}{53}{section.8.1}%
 \contentsline {section}{\numberline {8.2}Limitations}{54}{section.8.2}%
 \contentsline {section}{\numberline {8.3}Future Work}{54}{section.8.3}%
-\contentsline {subsection}{\numberline {8.3.1}Graph Neural Networks (GNN)}{55}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.1}Graph Neural Networks (GNN)}{54}{subsection.8.3.1}%
 \contentsline {subsection}{\numberline {8.3.2}Real-Time Streaming Detection}{55}{subsection.8.3.2}%
 \contentsline {subsection}{\numberline {8.3.3}SHAP Explainability}{55}{subsection.8.3.3}%
 \contentsline {subsection}{\numberline {8.3.4}Multi-Algorithm Ensemble}{55}{subsection.8.3.4}%
 \contentsline {subsection}{\numberline {8.3.5}Concept Drift Detection and Adaptive Retraining}{55}{subsection.8.3.5}%
-\contentsline {subsection}{\numberline {8.3.6}Docker Deployment}{56}{subsection.8.3.6}%
+\contentsline {subsection}{\numberline {8.3.6}Docker Deployment}{55}{subsection.8.3.6}%
 \contentsline {subsection}{\numberline {8.3.7}Feedback Loop Integration}{56}{subsection.8.3.7}%
 \contentsline {section}{\numberline {8.4}Summary}{56}{section.8.4}%
 \contentsline {chapter}{References}{57}{Item.38}%

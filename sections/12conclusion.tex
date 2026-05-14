@@ -23,7 +23,6 @@ Being honest about what the system does not do well is as important as documenti
 
     \item \textbf{Static model:} The model is trained once and does not update as new transactions arrive. Fraud patterns evolve over time, so a model trained today will gradually become less effective as fraudsters adapt. Periodic retraining is necessary in production.
 
-    \item \textbf{Simulated dataset:} The dataset used is from Kaggle and is described as ``realistic'' but is not actual UPI transaction data. Performance on real production data may differ from what we observed.
 
     \item \textbf{Single-hour velocity:} We compute velocity only in a one-hour window. Fraud patterns at different time scales (five minutes, one day, one week) might provide additional signal.
 
